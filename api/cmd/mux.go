@@ -1,0 +1,17 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v5"
+)
+
+func NewEchoMux() http.Handler {
+	e := echo.New()
+
+	e.GET("/health", func(c *echo.Context) error {
+		return c.String(http.StatusOK, "ok")
+	})
+
+	return e
+}
