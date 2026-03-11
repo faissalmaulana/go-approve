@@ -22,7 +22,7 @@ func NewRegisterHandler(a *auth.Auth) *RegisterHandler {
 }
 
 func (r *RegisterHandler) HandleFunc(c *echo.Context) error {
-	userPayload := new(dto.UserDTO)
+	userPayload := new(dto.UserRegisterDTO)
 	if err := c.Bind(userPayload); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

@@ -1,6 +1,6 @@
 package dto
 
-type UserDTO struct {
+type UserRegisterDTO struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Handler  string `json:"handler"`
