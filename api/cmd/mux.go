@@ -23,8 +23,9 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	e.Use(middleware.Recover())
 
 	e.GET("/health", p.Health.HandleFunc)
-	e.POST("/signup", p.Register.HandleFunc)
-	e.POST("/sign-in", p.Login.HandleFunc)
+
+	e.POST("/auth/sign-up", p.Register.HandleFunc)
+	e.POST("/auth/sign-in", p.Login.HandleFunc)
 
 	return e
 }
