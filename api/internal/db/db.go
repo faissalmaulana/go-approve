@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/faissalmaulana/go-approve/internal/model"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -33,6 +34,8 @@ func New(log *zap.Logger) *gorm.DB {
 	if err != nil {
 		log.Fatal("DB connection error", zap.Error(err))
 	}
+
+	db.AutoMigrate(&model.User{})
 
 	log.Info("DB connected", zap.String("addr", fmt.Sprintf("%s:%s", host, port)))
 

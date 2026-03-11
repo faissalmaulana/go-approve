@@ -12,7 +12,8 @@ import (
 type EchoMuxParams struct {
 	fx.In
 
-	Health *handlers.HealthHandler
+	Health   *handlers.HealthHandler
+	Register *handlers.RegisterHandler
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
@@ -21,6 +22,7 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	e.Use(middleware.Recover())
 
 	e.GET("/health", p.Health.HandleFunc)
+	e.POST("/signup", p.Register.HandleFunc)
 
 	return e
 }
