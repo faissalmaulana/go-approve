@@ -17,12 +17,19 @@ var (
 	username = os.Getenv("DB_USERNAME")
 	host     = os.Getenv("DB_HOST")
 	port     = os.Getenv("DB_PORT")
+	db       *gorm.DB
 )
 
 func New(log *zap.Logger) *gorm.DB {
+	// reuse connection
+	if db != nil {
+		return db
+	}
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, dbname)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var err error
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("DB connection error", zap.Error(err))
 	}
