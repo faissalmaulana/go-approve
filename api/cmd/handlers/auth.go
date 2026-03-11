@@ -69,9 +69,9 @@ func (l *LoginHandler) HandleFunc(c *echo.Context) error {
 	accessToken, err := l.auth.Login(c.Request().Context(), userPayload.Email, userPayload.Password)
 	if err != nil {
 		switch {
-		case errors.Is(err, service.ErrInvalidPayload), errors.Is(err, service.ErrUserNotFound):
+		case errors.Is(err, service.ErrInvalidPayload):
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		case errors.Is(err, service.ErrPasswordNotMatched):
+		case errors.Is(err, service.ErrPasswordNotMatched), errors.Is(err, service.ErrUserNotFound):
 			return echo.NewHTTPError(http.StatusBadRequest, "Password or Email is incorrect")
 		default:
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
