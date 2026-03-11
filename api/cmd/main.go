@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/faissalmaulana/go-approve/cmd/handlers"
-	"github.com/faissalmaulana/go-approve/cmd/internal/db"
+	"github.com/faissalmaulana/go-approve/internal/db"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
