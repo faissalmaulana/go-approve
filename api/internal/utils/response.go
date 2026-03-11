@@ -2,7 +2,7 @@ package utils
 
 type Response struct {
 	Data  any `json:"data"`
-	Error any `json:"error,omitempty"`
+	Error any `json:"error"`
 }
 
 func SuccessResponse(data any) Response {
