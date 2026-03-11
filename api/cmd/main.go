@@ -24,6 +24,7 @@ func main() {
 			fx.Annotate(user.New, fx.As(new(user.UserStorage))),
 			handlers.NewHealthHandler,
 			handlers.NewRegisterHandler,
+			handlers.NewLoginHandler,
 			zap.NewProduction,
 		),
 		fx.Invoke(func(*gorm.DB) {}),

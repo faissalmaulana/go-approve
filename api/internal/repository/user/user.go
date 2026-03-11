@@ -10,6 +10,7 @@ import (
 
 type UserStorage interface {
 	Create(ctx context.Context, email, name, password, handler string) (string, error)
+	FindByEmail(ctx context.Context, email string) (*model.User, error)
 }
 
 type UserRepository struct {
@@ -38,4 +39,16 @@ func (r *UserRepository) Create(ctx context.Context, email, name, password, hand
 	}
 
 	return u.ID, nil
+}
+
+func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	user, err := gorm.G[model.User](r.db).Where("email = ?", email).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

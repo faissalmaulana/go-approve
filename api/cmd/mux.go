@@ -14,6 +14,7 @@ type EchoMuxParams struct {
 
 	Health   *handlers.HealthHandler
 	Register *handlers.RegisterHandler
+	Login    *handlers.LoginHandler
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
@@ -23,6 +24,7 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 
 	e.GET("/health", p.Health.HandleFunc)
 	e.POST("/signup", p.Register.HandleFunc)
+	e.POST("/sign-in", p.Login.HandleFunc)
 
 	return e
 }

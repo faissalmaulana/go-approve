@@ -71,3 +71,39 @@ func (a *Auth) Register(ctx context.Context, email, name, password, handler stri
 
 	return accessToken, nil
 }
+
+func (a *Auth) Login(ctx context.Context, email, password string) (string, error) {
+	var emptyFields []string
+	if email == "" {
+		emptyFields = append(emptyFields, "email")
+	}
+
+	if password == "" {
+		emptyFields = append(emptyFields, "password")
+	}
+
+	if len(emptyFields) > 0 {
+		return "", fmt.Errorf("%w: %s", service.ErrInvalidPayload, strings.Join(emptyFields, ", "))
+	}
+
+	user, err := a.userStore.FindByEmail(ctx, email)
+	if err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return "", service.ErrUserNotFound
+		default:
+			return "", service.ErrInternal
+		}
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", service.ErrPasswordNotMatched
+	}
+
+	accessToken, err := a.jwt.GenerateAccessToken(user.ID)
+	if err != nil {
+		return "", service.ErrInternal
+	}
+
+	return accessToken, nil
+}

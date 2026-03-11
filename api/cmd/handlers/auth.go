@@ -51,13 +51,32 @@ func (r *RegisterHandler) HandleFunc(c *echo.Context) error {
 
 // ====== LOGIN HANDLER ======
 type LoginHandler struct {
+	auth *auth.Auth
 }
 
-func NewLoginHandler() *LoginHandler {
-	return &LoginHandler{}
+func NewLoginHandler(a *auth.Auth) *LoginHandler {
+	return &LoginHandler{
+		auth: a,
+	}
 }
 
-func (*LoginHandler) HandleFunc(c *echo.Context) error {
+func (l *LoginHandler) HandleFunc(c *echo.Context) error {
+	userPayload := new(dto.UserLoginDTO)
+	if err := c.Bind(userPayload); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
-	return c.String(http.StatusOK, "OK")
+	accessToken, err := l.auth.Login(c.Request().Context(), userPayload.Email, userPayload.Password)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrInvalidPayload), errors.Is(err, service.ErrUserNotFound):
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		case errors.Is(err, service.ErrPasswordNotMatched):
+			return echo.NewHTTPError(http.StatusBadRequest, "Password or Email is incorrect")
+		default:
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "Login Successfully", "access_token": accessToken})
 }
