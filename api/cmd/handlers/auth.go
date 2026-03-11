@@ -1,22 +1,23 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/faissalmaulana/go-approve/cmd/dto"
-	"github.com/faissalmaulana/go-approve/internal/repository/user"
+	"github.com/faissalmaulana/go-approve/internal/service"
+	"github.com/faissalmaulana/go-approve/internal/service/auth"
 	"github.com/labstack/echo/v5"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // ====== REGISTER HANDLER ======
 type RegisterHandler struct {
-	UserStore user.UserStorage
+	auth *auth.Auth
 }
 
-func NewRegisterHandler(u user.UserStorage) *RegisterHandler {
+func NewRegisterHandler(a *auth.Auth) *RegisterHandler {
 	return &RegisterHandler{
-		UserStore: u,
+		auth: a,
 	}
 }
 
@@ -26,22 +27,26 @@ func (r *RegisterHandler) HandleFunc(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userPayload.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := r.UserStore.Create(
+	accessToken, err := r.auth.Register(
 		c.Request().Context(),
 		userPayload.Email,
 		userPayload.Name,
-		string(hashedPassword),
+		userPayload.Password,
 		userPayload.Handler,
-	); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrDuplicatedUser):
+			return echo.NewHTTPError(http.StatusConflict, err.Error())
+		case errors.Is(err, service.ErrInvalidPayload):
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		default:
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "Register Successfully"})
+	return c.JSON(http.StatusCreated, map[string]string{"message": "Register Successfully", "access_token": accessToken})
 }
 
 // ====== LOGIN HANDLER ======
