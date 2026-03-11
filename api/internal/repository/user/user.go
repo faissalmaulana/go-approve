@@ -5,12 +5,14 @@ import (
 
 	"github.com/faissalmaulana/go-approve/internal/constant"
 	"github.com/faissalmaulana/go-approve/internal/model"
+	"github.com/faissalmaulana/go-approve/internal/model/public"
 	"gorm.io/gorm"
 )
 
 type UserStorage interface {
 	Create(ctx context.Context, email, name, password, handler string) (string, error)
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	FindByID(ctx context.Context, id string) (*public.UserPublic, error)
 }
 
 type UserRepository struct {
@@ -51,4 +53,18 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepository) FindByID(ctx context.Context, id string) (*public.UserPublic, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	var user = new(public.UserPublic)
+
+	err := gorm.G[model.User](r.db).Select("id", "name", "handler", "email").Where("id = ?", id).Limit(1).Scan(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
