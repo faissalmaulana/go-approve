@@ -3,15 +3,24 @@ package main
 import (
 	"net/http"
 
+	"github.com/faissalmaulana/go-approve/cmd/routes"
 	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
+	"go.uber.org/fx"
 )
 
-func NewEchoMux() http.Handler {
-	e := echo.New()
+type EchoMuxParams struct {
+	fx.In
 
-	e.GET("/health", func(c *echo.Context) error {
-		return c.String(http.StatusOK, "ok")
-	})
+	Health *routes.HealthHandler
+}
+
+func NewEchoMux(p EchoMuxParams) http.Handler {
+	e := echo.New()
+	e.Use(middleware.RequestLogger())
+	e.Use(middleware.Recover())
+
+	e.GET("/health", p.Health.HandleFunc)
 
 	return e
 }
