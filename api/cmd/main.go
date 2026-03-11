@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/faissalmaulana/go-approve/cmd/handlers"
+	"github.com/faissalmaulana/go-approve/cmd/middleware"
 	"github.com/faissalmaulana/go-approve/internal/db"
+	"github.com/faissalmaulana/go-approve/internal/repository/blocklisttoken"
 	"github.com/faissalmaulana/go-approve/internal/repository/user"
 	"github.com/faissalmaulana/go-approve/internal/service/auth"
 	"github.com/faissalmaulana/go-approve/internal/service/jwtfx"
@@ -25,11 +27,14 @@ func main() {
 			auth.New,
 			db.New,
 			fx.Annotate(user.New, fx.As(new(user.UserStorage))),
+			blocklisttoken.New,
 			userService.New,
 			handlers.NewHealthHandler,
 			handlers.NewRegisterHandler,
 			handlers.NewLoginHandler,
 			handlers.NewUserProfileHandler,
+			handlers.NewLogoutHandler,
+			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,
 			utils.NewSugaredErrorMessageValidator,

@@ -35,7 +35,7 @@ func New(log *zap.Logger) *gorm.DB {
 		log.Fatal("DB connection error", zap.Error(err))
 	}
 
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.User{}, &model.BloclistToken{})
 
 	log.Info("DB connected", zap.String("addr", fmt.Sprintf("%s:%s", host, port)))
 

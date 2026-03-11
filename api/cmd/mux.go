@@ -5,12 +5,13 @@ import (
 	"os"
 
 	"github.com/faissalmaulana/go-approve/cmd/handlers"
+	authMiddleware "github.com/faissalmaulana/go-approve/cmd/middleware"
 	"github.com/faissalmaulana/go-approve/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/joho/godotenv/autoload"
 	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
+	echomiddleware "github.com/labstack/echo/v5/middleware"
 	"go.uber.org/fx"
 )
 
@@ -21,12 +22,14 @@ type EchoMuxParams struct {
 	Register *handlers.RegisterHandler
 	Login    *handlers.LoginHandler
 	Profile  *handlers.UserProfileHandler
+	Logout   *handlers.LogoutHandler
+	Auth     *authMiddleware.AuthMiddleware
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
 	e := echo.New()
-	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
+	e.Use(echomiddleware.RequestLogger())
+	e.Use(echomiddleware.Recover())
 
 	e.GET("/health", p.Health.HandleFunc)
 
@@ -47,7 +50,10 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	}
 
 	r.Use(echojwt.WithConfig(config))
+	r.Use(p.Auth.Authenticate)
+
 	r.GET("/profile", p.Profile.HandleFunc)
+	r.POST("/logout", p.Logout.HandleFunc)
 
 	return e
 }

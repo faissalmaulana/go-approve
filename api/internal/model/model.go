@@ -17,3 +17,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	u.ID = uuid.New().String()
 	return nil
 }
+
+type BloclistToken struct {
+	Token string `gorm:"unique;type:varchar(255);not null"`
+}

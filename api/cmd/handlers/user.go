@@ -43,3 +43,27 @@ func (u *UserProfileHandler) HandleFunc(c *echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.SuccessResponse(currentUser))
 }
+
+type LogoutHandler struct {
+	user *user.User
+}
+
+func NewLogoutHandler(u *user.User) *LogoutHandler {
+	return &LogoutHandler{
+		user: u,
+	}
+}
+
+func (l *LogoutHandler) HandleFunc(c *echo.Context) error {
+	token, ok := c.Get("token").(string)
+	if !ok || token == "" {
+		return c.JSON(http.StatusUnauthorized, utils.ErrorResponse("token not found"))
+	}
+
+	err := l.user.Logout(c.Request().Context(), token)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, utils.SuccessResponse(map[string]string{"message": "Logout successfully"}))
+}

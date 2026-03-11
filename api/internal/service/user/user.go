@@ -4,18 +4,21 @@ import (
 	"context"
 
 	"github.com/faissalmaulana/go-approve/internal/model/public"
+	"github.com/faissalmaulana/go-approve/internal/repository/blocklisttoken"
 	"github.com/faissalmaulana/go-approve/internal/repository/user"
 	"github.com/faissalmaulana/go-approve/internal/service"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	userStorage user.UserStorage
+	userStorage   user.UserStorage
+	blocklistRepo blocklisttoken.BlocklistStorage
 }
 
-func New(u user.UserStorage) *User {
+func New(u user.UserStorage, b blocklisttoken.BlocklistStorage) *User {
 	return &User{
-		userStorage: u,
+		userStorage:   u,
+		blocklistRepo: b,
 	}
 }
 
@@ -35,4 +38,16 @@ func (u *User) GetCurrentUser(ctx context.Context, id string) (*public.UserPubli
 	}
 
 	return user, nil
+}
+
+func (u *User) Logout(ctx context.Context, token string) error {
+	if token == "" {
+		return service.ErrInvalidPayload
+	}
+
+	if err := u.blocklistRepo.Create(ctx, token); err != nil {
+		return service.ErrInternal
+	}
+
+	return nil
 }
