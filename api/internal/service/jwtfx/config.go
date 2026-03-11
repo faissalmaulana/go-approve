@@ -3,6 +3,8 @@ package jwtfx
 import (
 	"os"
 	"time"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type Config struct {
