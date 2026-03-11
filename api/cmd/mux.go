@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/faissalmaulana/go-approve/cmd/routes"
+	"github.com/faissalmaulana/go-approve/cmd/handlers"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/fx"
@@ -12,7 +12,7 @@ import (
 type EchoMuxParams struct {
 	fx.In
 
-	Health *routes.HealthHandler
+	Health *handlers.HealthHandler
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {

@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/faissalmaulana/go-approve/cmd/routes"
+	"github.com/faissalmaulana/go-approve/cmd/handlers"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -13,7 +13,7 @@ func main() {
 		fx.Provide(
 			NewEchoMux,
 			NewHttpServer,
-			routes.NewHealthHandler,
+			handlers.NewHealthHandler,
 			zap.NewProduction,
 		),
 		fx.Invoke(func(*http.Server) {})).Run()
