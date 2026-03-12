@@ -11,6 +11,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	echomiddleware "github.com/labstack/echo/v5/middleware"
 	"go.uber.org/fx"
 )
@@ -28,6 +29,11 @@ type EchoMuxParams struct {
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
 	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{os.Getenv("WEB_CLIENT_HOST")},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	}))
 	e.Use(echomiddleware.RequestLogger())
 	e.Use(echomiddleware.Recover())
 
