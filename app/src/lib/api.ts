@@ -76,7 +76,7 @@ export const api = {
   get: <T>(endpoint: string, options?: RequestOptions) =>
     request<T>(endpoint, { ...options, method: "GET" }),
 
-  post: <T>(endpoint: string, body: unknown, options?: RequestOptions) =>
+  post: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
     request<T>(endpoint, { ...options, method: "POST", body }),
 
   put: <T>(endpoint: string, body: unknown, options?: RequestOptions) =>
