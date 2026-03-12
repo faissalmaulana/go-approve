@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS blocklist_tokens(
+token VARCHAR(255) PRIMARY KEY NOT NULL
+);
