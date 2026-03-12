@@ -10,7 +10,7 @@ import (
 
 type BlocklistStorage interface {
 	Create(ctx context.Context, token string) error
-	FindByToken(ctx context.Context, token string) (*model.BloclistToken, error)
+	FindByToken(ctx context.Context, token string) (*model.BlocklistToken, error)
 }
 
 type BlocklistRepository struct {
@@ -27,22 +27,22 @@ func (r *BlocklistRepository) Create(ctx context.Context, token string) error {
 	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
 	defer cancel()
 
-	blocklist := &model.BloclistToken{
+	blocklist := &model.BlocklistToken{
 		Token: token,
 	}
 
-	if err := gorm.G[model.BloclistToken](r.db).Create(ctx, blocklist); err != nil {
+	if err := gorm.G[model.BlocklistToken](r.db).Create(ctx, blocklist); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *BlocklistRepository) FindByToken(ctx context.Context, token string) (*model.BloclistToken, error) {
+func (r *BlocklistRepository) FindByToken(ctx context.Context, token string) (*model.BlocklistToken, error) {
 	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
 	defer cancel()
 
-	blocklist, err := gorm.G[model.BloclistToken](r.db).Where("token = ?", token).First(ctx)
+	blocklist, err := gorm.G[model.BlocklistToken](r.db).Where("token = ?", token).First(ctx)
 	if err != nil {
 		return nil, err
 	}

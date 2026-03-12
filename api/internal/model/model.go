@@ -18,6 +18,6 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-type BloclistToken struct {
-	Token string `gorm:"unique;type:varchar(255);not null"`
+type BlocklistToken struct {
+	Token string `gorm:"primaryKey;type:varchar(255);not null"`
 }
