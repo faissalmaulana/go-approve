@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -12,16 +13,15 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useSignIn } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email."),
+  email: z.email("Please enter a valid email."),
   password: z.string().min(1, "Password is required."),
 })
 
 export type LoginValues = z.infer<typeof loginSchema>
-
-type SubmitResult = { ok: true } | { ok: false; error: string }
 
 export function LoginForm({
   className,
@@ -29,15 +29,15 @@ export function LoginForm({
   description,
   submitLabel = "Continue",
   bottomText,
-  onSubmitValues,
   ...props
 }: React.ComponentProps<"div"> & {
   title?: string
   description?: React.ReactNode
   submitLabel?: string
   bottomText?: React.ReactNode
-  onSubmitValues: (values: LoginValues) => Promise<SubmitResult>
 }) {
+  const navigate = useNavigate()
+  const signIn = useSignIn()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<LoginValues>({
@@ -58,8 +58,12 @@ export function LoginForm({
         <form
           onSubmit={form.handleSubmit(async (values) => {
             setServerError(null)
-            const result = await onSubmitValues(values)
-            if (!result.ok) setServerError(result.error)
+            try {
+              await signIn.mutateAsync(values)
+              navigate("/", { replace: true })
+            } catch (error) {
+              setServerError(error instanceof Error ? error.message : "Sign in failed")
+            }
           })}
           className="flex flex-col gap-4"
         >
@@ -95,8 +99,12 @@ export function LoginForm({
               <FieldError errors={[form.formState.errors.password]} />
             </Field>
             <Field>
-              <Button type="submit" className="h-10 rounded-md" disabled={form.formState.isSubmitting}>
-                {submitLabel}
+              <Button 
+                type="submit" 
+                className="h-10 rounded-md" 
+                disabled={form.formState.isSubmitting || signIn.isPending}
+              >
+                {signIn.isPending ? "Signing in..." : submitLabel}
               </Button>
               {bottomText ? (
                 <FieldDescription className="text-center">

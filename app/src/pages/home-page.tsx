@@ -1,16 +1,11 @@
-import { Navigate, useNavigate } from "react-router"
+import { useNavigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { clearAccessToken, getAccessToken } from "@/lib/auth"
+import { clearAccessToken } from "@/lib/auth"
 
 export function HomePage() {
   const navigate = useNavigate()
-  const token = getAccessToken()
-
-  if (!token) {
-    return <Navigate to="/login" replace />
-  }
 
   return (
     <main className="min-h-dvh px-4 py-10">

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useSignUp } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
 
 const registerSchema = z
@@ -32,23 +34,21 @@ const registerSchema = z
 
 export type RegisterValues = z.infer<typeof registerSchema>
 
-type SubmitResult = { ok: true } | { ok: false; error: string }
-
 export function RegisterForm({
   className,
   title = "Create account",
   description = "Register to start using Go Approve.",
   submitLabel = "Create account",
   bottomText,
-  onSubmitValues,
   ...props
 }: React.ComponentProps<"div"> & {
   title?: string
   description?: React.ReactNode
   submitLabel?: string
   bottomText?: React.ReactNode
-  onSubmitValues: (values: RegisterValues) => Promise<SubmitResult>
 }) {
+  const navigate = useNavigate()
+  const signUp = useSignUp()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<RegisterValues>({
@@ -75,8 +75,17 @@ export function RegisterForm({
         <form
           onSubmit={form.handleSubmit(async (values) => {
             setServerError(null)
-            const result = await onSubmitValues(values)
-            if (!result.ok) setServerError(result.error)
+            try {
+              await signUp.mutateAsync({
+                email: values.email,
+                name: values.name,
+                handler: values.handler,
+                password: values.password,
+              })
+              navigate("/", { replace: true })
+            } catch (error) {
+              setServerError(error instanceof Error ? error.message : "Sign up failed")
+            }
           })}
           className="flex flex-col gap-4"
         >
@@ -151,8 +160,12 @@ export function RegisterForm({
             </Field>
 
             <Field>
-              <Button type="submit" className="h-10 rounded-md" disabled={form.formState.isSubmitting}>
-                {submitLabel}
+              <Button
+                type="submit"
+                className="h-10 rounded-md"
+                disabled={form.formState.isSubmitting || signUp.isPending}
+              >
+                {signUp.isPending ? "Creating account..." : submitLabel}
               </Button>
               {bottomText ? (
                 <FieldDescription className="text-center">
