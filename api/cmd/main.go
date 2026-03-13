@@ -6,8 +6,10 @@ import (
 	"github.com/faissalmaulana/go-approve/cmd/handlers"
 	"github.com/faissalmaulana/go-approve/cmd/middleware"
 	"github.com/faissalmaulana/go-approve/internal/db"
+	approvalroomrepository "github.com/faissalmaulana/go-approve/internal/repository/approvalRoom"
 	"github.com/faissalmaulana/go-approve/internal/repository/blocklisttoken"
 	"github.com/faissalmaulana/go-approve/internal/repository/user"
+	approvalroom "github.com/faissalmaulana/go-approve/internal/service/approvalRoom"
 	"github.com/faissalmaulana/go-approve/internal/service/auth"
 	"github.com/faissalmaulana/go-approve/internal/service/jwtfx"
 	userService "github.com/faissalmaulana/go-approve/internal/service/user"
@@ -27,13 +29,16 @@ func main() {
 			auth.New,
 			db.New,
 			fx.Annotate(user.New, fx.As(new(user.UserStorage))),
+			fx.Annotate(approvalroomrepository.New, fx.As(new(approvalroomrepository.ApprovalRoomStorage))),
 			blocklisttoken.New,
 			userService.New,
+			approvalroom.New,
 			handlers.NewHealthHandler,
 			handlers.NewRegisterHandler,
 			handlers.NewLoginHandler,
 			handlers.NewUserProfileHandler,
 			handlers.NewLogoutHandler,
+			handlers.NewCreateApprovalRoomHandler,
 			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,

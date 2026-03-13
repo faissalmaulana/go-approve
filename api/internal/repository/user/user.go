@@ -13,6 +13,7 @@ type UserStorage interface {
 	Create(ctx context.Context, email, name, password, handler string) (string, error)
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
 	FindByID(ctx context.Context, id string) (*public.UserPublic, error)
+	FindByIDs(ctx context.Context, ids []string) ([]*model.User, error)
 }
 
 type UserRepository struct {
@@ -67,4 +68,21 @@ func (r *UserRepository) FindByID(ctx context.Context, id string) (*public.UserP
 	}
 
 	return user, nil
+}
+
+func (r *UserRepository) FindByIDs(ctx context.Context, ids []string) ([]*model.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	users, err := gorm.G[model.User](r.db).Where("id IN ?", ids).Find(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.User, len(users))
+	for i := range users {
+		result[i] = &users[i]
+	}
+
+	return result, nil
 }

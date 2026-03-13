@@ -51,3 +51,21 @@ func (u *User) Logout(ctx context.Context, token string) error {
 
 	return nil
 }
+
+func (u *User) GetUserIdsOnly(ctx context.Context, ids []string) ([]string, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	users, err := u.userStorage.FindByIDs(ctx, ids)
+	if err != nil {
+		return nil, service.ErrInternal
+	}
+
+	result := make([]string, len(users))
+	for i, user := range users {
+		result[i] = user.ID
+	}
+
+	return result, nil
+}
