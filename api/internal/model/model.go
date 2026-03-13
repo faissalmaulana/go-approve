@@ -34,6 +34,11 @@ type ApprovalRoom struct {
 	UpdatedAt   *time.Time `json:"updated_at"`
 }
 
+func (a *ApprovalRoom) BeforeCreate(tx *gorm.DB) error {
+	a.ID = uuid.New().String()
+	return nil
+}
+
 type ApprovalRoomApprover struct {
 	ApprovalId     string `json:"approval_id"`
 	ApprovalRoomId string `json:"approval_room_id"`
