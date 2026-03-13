@@ -34,7 +34,7 @@ type ApprovalRoom struct {
 	UpdatedAt   *time.Time `json:"updated_at"`
 }
 
-type ApprovalRoomApprovers struct {
+type ApprovalRoomApprover struct {
 	ApprovalId     string `json:"approval_id"`
 	ApprovalRoomId string `json:"approval_room_id"`
 	Decision       string `json:"decision"`
