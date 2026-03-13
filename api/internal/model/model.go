@@ -33,3 +33,9 @@ type ApprovalRoom struct {
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   *time.Time `json:"updated_at"`
 }
+
+type ApprovalRoomApprovers struct {
+	ApprovalId     string `json:"approval_id"`
+	ApprovalRoomId string `json:"approval_room_id"`
+	Decision       string `json:"decision"`
+}
