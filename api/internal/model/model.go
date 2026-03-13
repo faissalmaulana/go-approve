@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -20,4 +22,14 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 
 type BlocklistToken struct {
 	Token string `gorm:"primaryKey;type:varchar(255);not null"`
+}
+
+type ApprovalRoom struct {
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	Filepaths   string     `json:"filepaths"` // this is the raw form which is each filepath is seperated with ";"
+	DueAt       time.Time  `json:"due_at"`
+	SubmitterId string     `json:"submitter_id"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   *time.Time `json:"updated_at"`
 }
