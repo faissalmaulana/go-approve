@@ -39,3 +39,13 @@ type ApprovalRoomApprovers struct {
 	ApprovalRoomId string `json:"approval_room_id"`
 	Decision       string `json:"decision"`
 }
+
+type ReviewRequest struct {
+	ID             string    `json:"id"`
+	IsRead         bool      `json:"is_read"`
+	Status         string    `json:"status"`
+	CreatedAt      time.Time `json:"created_at"`
+	ApprovalRoomId string    `json:"approval_room_id"`
+	InviteeId      string    `json:"invitee_id"`
+	RequesterId    string    `json:"requester_id"`
+}
