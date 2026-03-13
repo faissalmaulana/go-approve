@@ -54,3 +54,8 @@ type ReviewRequest struct {
 	InviteeId      string    `json:"invitee_id"`
 	RequesterId    string    `json:"requester_id"`
 }
+
+func (r *ReviewRequest) BeforeCreate(tx *gorm.DB) error {
+	r.ID = uuid.New().String()
+	return nil
+}
