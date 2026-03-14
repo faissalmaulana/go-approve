@@ -2,6 +2,7 @@ import { useNavigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { useUser, useLogout } from "@/hooks/use-auth"
+import { SidebarTrigger } from "./ui/sidebar"
 
 export function Header() {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ export function Header() {
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
-        <div className="font-semibold">Go Approve</div>
+        <SidebarTrigger />
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
