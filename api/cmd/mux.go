@@ -26,6 +26,7 @@ type EchoMuxParams struct {
 	Logout             *handlers.LogoutHandler
 	Auth               *authMiddleware.AuthMiddleware
 	CreateApprovalRoom *handlers.CreateApprovalRoomHandler
+	GetUsersByUsername *handlers.GetUsersByUsernameHandler
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
@@ -59,6 +60,7 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	r.Use(echojwt.WithConfig(config))
 	r.Use(p.Auth.Authenticate)
 
+	r.GET("/search-users", p.GetUsersByUsername.HandleFunc)
 	r.GET("/profile", p.Profile.HandleFunc)
 	r.POST("/logout", p.Logout.HandleFunc)
 

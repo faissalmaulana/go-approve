@@ -35,7 +35,10 @@ type ApprovalRoom struct {
 }
 
 func (a *ApprovalRoom) BeforeCreate(tx *gorm.DB) error {
-	a.ID = uuid.New().String()
+	// somehow in the repository they create a new one manually
+	if a.ID == "" {
+		a.ID = uuid.New().String()
+	}
 	return nil
 }
 

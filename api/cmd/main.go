@@ -8,6 +8,8 @@ import (
 	"github.com/faissalmaulana/go-approve/internal/db"
 	approvalroomrepository "github.com/faissalmaulana/go-approve/internal/repository/approvalRoom"
 	"github.com/faissalmaulana/go-approve/internal/repository/blocklisttoken"
+	requestreview "github.com/faissalmaulana/go-approve/internal/repository/requestReview"
+	"github.com/faissalmaulana/go-approve/internal/repository/transactions"
 	"github.com/faissalmaulana/go-approve/internal/repository/user"
 	approvalroom "github.com/faissalmaulana/go-approve/internal/service/approvalRoom"
 	"github.com/faissalmaulana/go-approve/internal/service/auth"
@@ -28,8 +30,10 @@ func main() {
 			NewHttpServer,
 			auth.New,
 			db.New,
+			fx.Annotate(transactions.New, fx.As(new(transactions.DatabaseTransaction))),
 			fx.Annotate(user.New, fx.As(new(user.UserStorage))),
 			fx.Annotate(approvalroomrepository.New, fx.As(new(approvalroomrepository.ApprovalRoomStorage))),
+			fx.Annotate(requestreview.New, fx.As(new(requestreview.RequestReviewStorage))),
 			blocklisttoken.New,
 			userService.New,
 			approvalroom.New,
@@ -39,6 +43,7 @@ func main() {
 			handlers.NewUserProfileHandler,
 			handlers.NewLogoutHandler,
 			handlers.NewCreateApprovalRoomHandler,
+			handlers.NewGetUsersByUsernameHandler,
 			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,

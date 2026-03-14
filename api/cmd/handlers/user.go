@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/faissalmaulana/go-approve/cmd/dto"
 	"github.com/faissalmaulana/go-approve/internal/service"
 	"github.com/faissalmaulana/go-approve/internal/service/user"
 	"github.com/faissalmaulana/go-approve/internal/utils"
@@ -66,4 +68,51 @@ func (l *LogoutHandler) HandleFunc(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.SuccessResponse(map[string]string{"message": "Logout successfully"}))
+}
+
+// username is the handler
+type GetUsersByUsernameHandler struct {
+	user *user.User
+}
+
+func NewGetUsersByUsernameHandler(u *user.User) *GetUsersByUsernameHandler {
+	return &GetUsersByUsernameHandler{
+		user: u,
+	}
+}
+
+func (g *GetUsersByUsernameHandler) HandleFunc(c *echo.Context) error {
+	var getUsersByUsername = new(dto.GetUsersByUsernameDTO)
+	if err := c.Bind(getUsersByUsername); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
+	}
+
+	if len(getUsersByUsername.Handle) < 3 {
+		return c.JSON(http.StatusBadRequest, utils.ErrorResponse(errors.New("handle must at least 3 character").Error()))
+	}
+
+	users, err := g.user.SearchUsers(c.Request().Context(), getUsersByUsername.Handle)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err.Error()))
+	}
+
+	response := []struct {
+		Id      string `json:"id"`
+		Name    string `json:"name"`
+		Handler string `json:"handler"`
+	}{}
+
+	for _, user := range *users {
+		response = append(response, struct {
+			Id      string `json:"id"`
+			Name    string `json:"name"`
+			Handler string `json:"handler"`
+		}{
+			Id:      user.ID,
+			Name:    user.Name,
+			Handler: user.Handler,
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.SuccessResponse(response))
 }

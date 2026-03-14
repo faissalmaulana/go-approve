@@ -69,3 +69,12 @@ func (u *User) GetUserIdsOnly(ctx context.Context, ids []string) ([]string, erro
 
 	return result, nil
 }
+
+func (u *User) SearchUsers(ctx context.Context, handle string) (*[]public.UserPublic, error) {
+	users, err := u.userStorage.SearchUsersByHandle(ctx, handle)
+	if err != nil {
+		return nil, service.ErrInternal
+	}
+
+	return users, nil
+}

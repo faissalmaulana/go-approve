@@ -100,11 +100,18 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 		}
 	}
 
+	// GET USERS APPROVALS
+	approverIds, err := a.user.GetUserIdsOnly(c.Request().Context(), jsonCreateApprovalRoom.Approvers)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+	}
+
 	newApprovalRoom := &contractapprovalroom.CreateApprovalRoom{
 		Title:       jsonCreateApprovalRoom.Title,
 		DueAt:       jsonCreateApprovalRoom.DueAt,
 		Filepaths:   filepaths,
 		SubmitterId: currentUser.ID,
+		InviteeIds:  approverIds,
 	}
 
 	// CREATE ROOM
@@ -112,13 +119,5 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 	}
 
-	// GET USERS APPROVALS
-	approverIds, err := a.user.GetUserIdsOnly(c.Request().Context(), jsonCreateApprovalRoom.Approvers)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-	}
-
-	// CREATE INVITATION TO APPORVALS
-
-	return c.JSON(http.StatusCreated, utils.SuccessResponse(approverIds))
+	return c.JSON(http.StatusCreated, utils.SuccessResponse(map[string]string{"message": "Success Create Room"}))
 }

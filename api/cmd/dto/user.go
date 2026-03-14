@@ -11,3 +11,7 @@ type UserLoginDTO struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=0,max=60"`
 }
+
+type GetUsersByUsernameDTO struct {
+	Handle string `query:"handle"`
+}

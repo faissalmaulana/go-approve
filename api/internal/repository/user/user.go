@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"strings"
 
 	"github.com/faissalmaulana/go-approve/internal/constant"
 	"github.com/faissalmaulana/go-approve/internal/model"
@@ -14,6 +15,7 @@ type UserStorage interface {
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
 	FindByID(ctx context.Context, id string) (*public.UserPublic, error)
 	FindByIDs(ctx context.Context, ids []string) ([]*model.User, error)
+	SearchUsersByHandle(ctx context.Context, handle string) (*[]public.UserPublic, error)
 }
 
 type UserRepository struct {
@@ -85,4 +87,23 @@ func (r *UserRepository) FindByIDs(ctx context.Context, ids []string) ([]*model.
 	}
 
 	return result, nil
+}
+
+func (r *UserRepository) SearchUsersByHandle(ctx context.Context, handle string) (*[]public.UserPublic, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	result := []public.UserPublic{}
+
+	pattern := strings.Builder{}
+	pattern.WriteString(handle)
+	pattern.WriteString("%")
+
+	err := gorm.G[model.User](r.db).Select("id", "name", "handler").Where("handler LIKE ?", pattern.String()).Scan(ctx, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+
 }

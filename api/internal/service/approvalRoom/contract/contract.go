@@ -7,4 +7,5 @@ type CreateApprovalRoom struct {
 	DueAt       time.Time
 	Filepaths   []string
 	SubmitterId string
+	InviteeIds  []string
 }
