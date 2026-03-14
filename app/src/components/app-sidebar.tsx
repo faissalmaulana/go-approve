@@ -38,8 +38,13 @@ const navigationsData = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="h-14 flex justify-center">
-        <div className="font-semibold text-xl text-blue-500">Go Approve</div>
+      <SidebarHeader className="h-14 flex items-start justify-center">
+        <div className="group flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-sm transition-transform group-hover:scale-105">
+            GA
+          </div>
+          <p className="text-primary text-lg font-semibold">GoApprove</p>
+        </div>
       </SidebarHeader>
       <Separator />
       <SidebarContent>
