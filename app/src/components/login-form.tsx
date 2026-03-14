@@ -48,7 +48,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <div className="rounded-lg border border-border/30 px-5 py-6">
+      <div className="rounded-lg border border-border/30 px-5 py-6 bg-background">
         <div className="mb-5 text-center">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           {description ? (
@@ -99,9 +99,9 @@ export function LoginForm({
               <FieldError errors={[form.formState.errors.password]} />
             </Field>
             <Field>
-              <Button 
-                type="submit" 
-                className="h-10 rounded-md" 
+              <Button
+                type="submit"
+                className="h-10 rounded-md"
                 disabled={form.formState.isSubmitting || signIn.isPending}
               >
                 {signIn.isPending ? "Signing in..." : submitLabel}
