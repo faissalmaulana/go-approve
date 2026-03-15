@@ -4,7 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@base-ui/react";
 import { CalendarIcon, File, SearchIcon, X } from "lucide-react";
@@ -121,103 +121,108 @@ export function NewApprovalRoom() {
           </Field>
         </FieldGroup>
 
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="documents">Documents</FieldLabel>
-            <Input
-              id="documents"
-              type="file"
-              multiple
-              accept=".pdf/.docs"
-              onChange={(e) => {
-                if (e.target.files) {
-                  setFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
-                }
-              }}
-            />
-          </Field>
-          <div className="space-y-2">
-            {files.map((file) => (
-              <div key={file.name}>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <File className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="truncate text-sm">{file.name}</span>
+        <FieldGroup className="grid grid-cols-2">
+          <div className="space-y-4">
+            <Field>
+              <FieldLabel htmlFor="documents">Documents</FieldLabel>
+              <Input
+                id="documents"
+                type="file"
+                multiple
+                accept=".pdf/.docs"
+                className="h-10 rounded-md"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
+                  }
+                }}
+              />
+            </Field>
+            <div className="space-y-2">
+              {files.map((file) => (
+                <div key={file.name}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <File className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="truncate text-sm">{file.name}</span>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <span className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</span>
+                      <button
+                        type="button"
+                        onClick={() => setFiles((prev) => prev.filter((f) => f.name !== file.name))}
+                        className="rounded-full hover:bg-muted p-1"
+                        aria-label="Remove file"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <span className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</span>
-                    <button
-                      type="button"
-                      onClick={() => setFiles((prev) => prev.filter((f) => f.name !== file.name))}
-                      className="rounded-full hover:bg-muted p-1"
-                      aria-label="Remove file"
-                    >
-                      <X className="size-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <Separator className="mt-2 border" />
-              </div>
-            ))}
-          </div>
-        </FieldGroup>
-
-        <FieldGroup>
-          <FieldLabel>Search Approvers</FieldLabel>
-          <InputGroup>
-            <InputGroupInput
-              id="search-input"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <InputGroupAddon align="inline-start">
-              <SearchIcon className="text-muted-foreground" />
-            </InputGroupAddon>
-          </InputGroup>
-          {filteredResults.length > 0 && (
-            <div className="border rounded-lg mt-2">
-              {filteredResults.map((result) => (
-                <div
-                  key={result.id}
-                  className="cursor-pointer hover:bg-muted p-2"
-                  onClick={() => handleSelectApprover(result)}
-                >
-                  <Item>
-                    <ItemMedia variant="icon">
-                      <div className="bg-muted rounded-full size-8 flex items-center justify-center text-xs font-medium">
-                        {result.username.charAt(0).toUpperCase()}
-                      </div>
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{result.username}</ItemTitle>
-                      <ItemDescription>{result.email}</ItemDescription>
-                    </ItemContent>
-                  </Item>
+                  <Separator className="mt-2 border" />
                 </div>
               ))}
             </div>
-          )}
-          {selectedApprovers.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <FieldLabel>Selected Approvers</FieldLabel>
-              <div className="flex flex-wrap gap-2">
-                {selectedApprovers.map((approver) => (
-                  <Badge key={approver.id} variant="secondary" className="p-3">
-                    {approver.username}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveApprover(approver.id)}
-                      className="ml-0.5 rounded-full hover:bg-secondary/80 p-0.5"
-                      aria-label="Remove approver"
-                    >
-                      <X data-icon="inline-end" className="size-3" />
-                    </button>
-                  </Badge>
-                ))}
+          </div>
+
+          <div className="space-y-4">
+            <Field>
+              <FieldLabel>Search Approvers</FieldLabel>
+              <div className="relative">
+                <InputGroup>
+                  <InputGroupInput
+                    id="search-input"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    className="h-10 rounded-md"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <InputGroupAddon align="inline-start">
+                    <SearchIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                </InputGroup>
+                {filteredResults.length > 0 && (
+                  <div className="absolute left-0 right-0 border rounded-lg mt-1 bg-popover shadow-md z-50">
+                    {filteredResults.map((result) => (
+                      <div
+                        key={result.id}
+                        className="cursor-pointer hover:bg-muted p-2"
+                        onClick={() => handleSelectApprover(result)}
+                      >
+                        <Item>
+                          <ItemContent>
+                            <ItemTitle className="truncate">{result.username}</ItemTitle>
+                            <ItemDescription className="truncate">{result.email}</ItemDescription>
+                          </ItemContent>
+                        </Item>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+            </Field>
+            <div className="space-y-2 mt-8">
+              <FieldLabel>Selected Approvers</FieldLabel>
+              {selectedApprovers.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {selectedApprovers.map((approver) => (
+                    <Badge key={approver.id} variant="secondary" className="p-3">
+                      {approver.username}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveApprover(approver.id)}
+                        className="ml-0.5 rounded-full hover:bg-secondary/80 p-0.5"
+                        aria-label="Remove approver"
+                      >
+                        <X data-icon="inline-end" className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No approvers picked yet.</p>
+              )}
             </div>
-          )}
+          </div>
         </FieldGroup>
 
         <Field orientation={"horizontal"} className="mt-16 flex justify-end">
