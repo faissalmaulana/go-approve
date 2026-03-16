@@ -130,7 +130,6 @@ export function NewApprovalRoom() {
                 type="file"
                 multiple
                 accept=".pdf/.docs"
-                className="h-10 rounded-md"
                 onChange={(e) => {
                   if (e.target.files) {
                     setFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
@@ -181,7 +180,7 @@ export function NewApprovalRoom() {
                   </InputGroupAddon>
                 </InputGroup>
                 {filteredResults.length > 0 && (
-                  <div className="absolute left-0 right-0 border rounded-lg mt-1 bg-popover shadow-md z-50">
+                  <div className="absolute left-0 right-0 border rounded-lg mt-1 bg-popover shadow-md z-50 max-h-60 overflow-y-auto">
                     {filteredResults.map((result) => (
                       <div
                         key={result.id}
