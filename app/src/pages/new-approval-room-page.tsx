@@ -8,7 +8,16 @@ import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/i
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@base-ui/react";
 import { CalendarIcon, File, SearchIcon, X } from "lucide-react";
-import { useState } from "react";
+import { useDeferredValue, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { getAuthHeaders } from "@/lib/auth";
+
+type SearchUser = {
+  id: string;
+  name: string;
+  handler: string;
+};
 
 function formatDate(date: Date | undefined) {
   if (!date) {
@@ -38,23 +47,25 @@ export function NewApprovalRoom() {
   const [value, setValue] = useState(formatDate(date))
 
   const [files, setFiles] = useState<File[]>([])
-  const [selectedApprovers, setSelectedApprovers] = useState<{ id: string; username: string; email: string }[]>([])
+  const [selectedApprovers, setSelectedApprovers] = useState<{ id: string; name: string; handler: string }[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults] = useState<{ id: string; username: string; email: string }[]>([
-    { id: "1", username: "john_doe", email: "john@example.com" },
-    { id: "2", username: "jane_smith", email: "jane@example.com" },
-    { id: "3", username: "bob_wilson", email: "bob@example.com" },
-  ])
+  const deferredSearchQuery = useDeferredValue(searchQuery)
 
-  const filteredResults = searchQuery
-    ? searchResults.filter(
-      (r) =>
-        r.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !selectedApprovers.find((a) => a.id === r.id)
-    )
-    : []
+  const { data: searchResults = [] } = useQuery({
+    queryKey: ["search-users", deferredSearchQuery],
+    queryFn: async () => {
+      if (!deferredSearchQuery.trim()) return []
+      const users = await api.get<SearchUser[]>(`/search-users?handle=${encodeURIComponent(deferredSearchQuery)}`, {
+        headers: getAuthHeaders(),
+      })
+      return users
+    },
+    enabled: deferredSearchQuery.trim().length > 0,
+  })
 
-  const handleSelectApprover = (approver: { id: string; username: string; email: string }) => {
+  const filteredResults = searchResults.filter((r) => !selectedApprovers.find((a) => a.id === r.id))
+
+  const handleSelectApprover = (approver: { id: string; name: string; handler: string }) => {
     if (!selectedApprovers.find((a) => a.id === approver.id)) {
       setSelectedApprovers((prev) => [...prev, approver])
     }
@@ -189,8 +200,8 @@ export function NewApprovalRoom() {
                       >
                         <Item>
                           <ItemContent>
-                            <ItemTitle className="truncate">{result.username}</ItemTitle>
-                            <ItemDescription className="truncate">{result.email}</ItemDescription>
+                            <ItemTitle className="truncate">{result.name}</ItemTitle>
+                            <ItemDescription className="truncate">{["@", result.handler ?? ""].join("")}</ItemDescription>
                           </ItemContent>
                         </Item>
                       </div>
@@ -205,7 +216,7 @@ export function NewApprovalRoom() {
                 <div className="flex flex-wrap gap-2">
                   {selectedApprovers.map((approver) => (
                     <Badge key={approver.id} variant="secondary" className="p-3">
-                      {approver.username}
+                      {approver.name}
                       <button
                         type="button"
                         onClick={() => handleRemoveApprover(approver.id)}
