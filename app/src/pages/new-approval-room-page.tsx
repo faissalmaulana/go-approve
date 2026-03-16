@@ -1,5 +1,10 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -39,8 +44,9 @@ function isValidDate(date: Date | undefined) {
 
 export function NewApprovalRoom() {
   const [open, setOpen] = useState(false)
+  const [alertOpen, setAlertOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(
-    new Date("2025-06-01")
+    new Date()
   )
 
   const [month, setMonth] = useState<Date | undefined>(date)
@@ -236,7 +242,29 @@ export function NewApprovalRoom() {
         </FieldGroup>
 
         <Field orientation={"horizontal"} className="mt-16 flex justify-end">
-          <Button className={"p-5"}>Create Approval Room</Button>
+          <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+            <AlertDialogTrigger>
+              <span className={cn(buttonVariants({ variant: "default" }), "p-5")}>
+                Create Approval Room
+              </span>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Create Approval Room?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to create a new approval room? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => {
+                  console.log("Create approval room")
+                }}>
+                  Create
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </Field>
       </form>
     </div>
