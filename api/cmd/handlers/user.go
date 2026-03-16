@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/faissalmaulana/go-approve/cmd/dto"
@@ -88,7 +87,8 @@ func (g *GetUsersByUsernameHandler) HandleFunc(c *echo.Context) error {
 	}
 
 	if len(getUsersByUsername.Handle) < 3 {
-		return c.JSON(http.StatusBadRequest, utils.ErrorResponse(errors.New("handle must at least 3 character").Error()))
+		// send empty array
+		return c.JSON(http.StatusOK, utils.SuccessResponse([]any{}))
 	}
 
 	users, err := g.user.SearchUsers(c.Request().Context(), getUsersByUsername.Handle)
