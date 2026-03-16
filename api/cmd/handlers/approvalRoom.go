@@ -115,9 +115,13 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 	}
 
 	// CREATE ROOM
-	if err := a.approvalRoomService.Create(c.Request().Context(), newApprovalRoom); err != nil {
+	newApprovalRoomId, err := a.approvalRoomService.Create(c.Request().Context(), newApprovalRoom)
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 	}
 
-	return c.JSON(http.StatusCreated, utils.SuccessResponse(map[string]string{"message": "Success Create Room"}))
+	return c.JSON(http.StatusCreated, utils.SuccessResponse(map[string]string{
+		"message":              "Success Create Room",
+		"new_approval_room_id": newApprovalRoomId,
+	}))
 }

@@ -27,7 +27,7 @@ func New(
 	}
 }
 
-func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateApprovalRoom) error {
+func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateApprovalRoom) (string, error) {
 	var approvalRoomId string
 
 	createApprovalRoom := a.approvalRoomStorage.CreateWithTx(
@@ -44,5 +44,9 @@ func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateAppr
 		&approvalRoomId,
 	)
 
-	return a.dbTransaction.RunTransactions(ctx, createApprovalRoom, createReviewRequests)
+	if err := a.dbTransaction.RunTransactions(ctx, createApprovalRoom, createReviewRequests); err != nil {
+		return "", err
+	}
+
+	return approvalRoomId, nil
 }

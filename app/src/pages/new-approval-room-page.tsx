@@ -30,6 +30,7 @@ type SearchUser = {
 
 type CreateApprovalRoomResponse = {
   message: string
+  new_approval_room_id: string
 }
 
 const approvalRoomSchema = z.object({
@@ -99,7 +100,7 @@ export function NewApprovalRoom() {
       })
       return response
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       setAlertOpen(false)
       setFiles([])
       setSelectedApprovers([])
@@ -107,7 +108,7 @@ export function NewApprovalRoom() {
       setDate(undefined)
       form.reset()
 
-      navigate("/")
+      navigate(`/${response.new_approval_room_id}`)
     },
     onError: (error) => {
       console.error(error)
