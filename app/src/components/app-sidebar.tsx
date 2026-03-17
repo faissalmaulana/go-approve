@@ -1,5 +1,20 @@
-import { Separator } from "./ui/separator";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import { Link } from "react-router"
+
+import { useActivePath } from "@/hooks/use-active-path"
+
+import { Separator } from "./ui/separator"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "./ui/sidebar"
 
 const navigationsData = {
   navMain: [
@@ -36,6 +51,8 @@ const navigationsData = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { isActive } = useActivePath()
+
   return (
     <Sidebar {...props}>
       <SidebarHeader className="h-14 flex items-start justify-center">
@@ -55,8 +72,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {navItem.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton >
-                      <a href={item.url}>{item.title}</a>
+                    <SidebarMenuButton
+                      render={<Link to={item.url} />}
+                      isActive={isActive(item.url, {
+                        end: item.url === "/" || item.url.startsWith("/invitations/"),
+                      })}
+                    >
+                      {item.title}
                     </SidebarMenuButton>
                     {item.withBadge && (
                       <SidebarMenuBadge>25</SidebarMenuBadge>
