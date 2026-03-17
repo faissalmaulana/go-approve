@@ -25,12 +25,15 @@ type BlocklistToken struct {
 }
 
 type ApprovalRoom struct {
-	ID          string     `json:"id"`
-	Title       string     `json:"title"`
-	DueAt       time.Time  `json:"due_at"`
-	SubmitterId string     `json:"submitter_id"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at"`
+	ID                    string                 `json:"id"`
+	Title                 string                 `json:"title"`
+	DueAt                 time.Time              `json:"due_at"`
+	SubmitterId           string                 `json:"submitter_id"`
+	CreatedAt             time.Time              `json:"created_at"`
+	UpdatedAt             *time.Time             `json:"updated_at"`
+	Submitter             User                   `gorm:"foreignKey:SubmitterId;references:ID"`
+	Files                 []FileMetadata         `gorm:"foreignKey:ApprovalRoomId;references:ID"`
+	ApprovalRoomApprovers []ApprovalRoomApprover `gorm:"foreignKey:ApprovalRoomId;references:ID"`
 }
 
 func (a *ApprovalRoom) BeforeCreate(tx *gorm.DB) error {
@@ -45,6 +48,7 @@ type ApprovalRoomApprover struct {
 	ApprovalId     string `json:"approval_id"`
 	ApprovalRoomId string `json:"approval_room_id"`
 	Decision       string `json:"decision"`
+	Approval       User   `gorm:"foreignKey:ApprovalId;references:ID"`
 }
 
 type ReviewRequest struct {

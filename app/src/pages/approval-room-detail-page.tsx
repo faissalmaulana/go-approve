@@ -181,7 +181,7 @@ export function ApprovalRoomDetailPage() {
                         <ItemContent className="gap-0">
                           <ItemTitle className="text-base font-semibold">{approver.name}</ItemTitle>
                           <ItemDescription className="flex items-center justify-between gap-3">
-                            <span>{approver.handle}</span>
+                            <span>{["@", approver.handle].join("")}</span>
                             <Badge
                               className={cn(
                                 "capitalize px-3 py-1 text-sm font-medium",

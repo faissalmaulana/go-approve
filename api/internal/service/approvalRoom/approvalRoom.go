@@ -2,7 +2,6 @@ package approvalroom
 
 import (
 	"context"
-	"time"
 
 	approvalroomrepository "github.com/faissalmaulana/go-approve/internal/repository/approvalRoom"
 	filemetadatarepository "github.com/faissalmaulana/go-approve/internal/repository/fileMetadata"
@@ -61,48 +60,51 @@ func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateAppr
 }
 
 func (a *ApprovalRoomService) GetApprovalRoomById(id string) (*contract.GetApprovalRoomByID, error) {
+	ctx := context.Background()
+
+	detail, err := a.approvalRoomStorage.GetApprovalRoomByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	counts, err := a.approvalRoomStorage.GetApprovalRoomCountsByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	documents := make([]contract.ApprovalDocument, 0, len(detail.Files))
+	for _, f := range detail.Files {
+		documents = append(documents, contract.ApprovalDocument{
+			Link:            f.Link,
+			DisplayFileName: f.Filename,
+			Size:            f.Size,
+		})
+	}
+
+	approvers := make([]contract.ApprovalApprover, 0, len(detail.Approvers))
+	for _, ap := range detail.Approvers {
+		approvers = append(approvers, contract.ApprovalApprover{
+			Handle:   ap.Handle,
+			Name:     ap.Name,
+			Decision: ap.Decision,
+		})
+	}
+
+	approvalProgress := 0
+	if counts.TotalApprover > 0 {
+		approvalProgress = int(counts.ApprovedCount * 100 / counts.TotalApprover)
+	}
+
 	return &contract.GetApprovalRoomByID{
-		Title:           "FIFA World Cup 2026 Sponsorship Agreement",
-		CreatedAt:       time.Now(),
-		DueAt:           time.Now().Add(time.Hour * 72),
-		SubmitterHandle: "John Doe",
-		Documents: []contract.ApprovalDocument{
-			{
-				Link:            "localhost:8080/example.com",
-				DisplayFileName: "Sponsorship Agreement v3.pdf",
-				Size:            2048,
-			},
-			{
-				Link:            "localhost:8080/example.com",
-				DisplayFileName: "Budget Breakdown Q1.xlsx",
-				Size:            512,
-			},
-			{
-				Link:            "localhost:8080/example.com",
-				DisplayFileName: "Legal Terms Final.pdf",
-				Size:            1024,
-			},
-		},
-		Approvers: []contract.ApprovalApprover{
-			{
-				Handle:   "@sarah.connor",
-				Name:     "Sarah Connor",
-				Decision: "approved",
-			},
-			{
-				Handle:   "@michael.scott",
-				Name:     "Michael Scott",
-				Decision: "pending",
-			},
-			{
-				Handle:   "@tony.stark",
-				Name:     "Tony Stark",
-				Decision: "rejected",
-			},
-		},
+		Title:           detail.Room.Title,
+		CreatedAt:       detail.Room.CreatedAt,
+		DueAt:           detail.Room.DueAt,
+		SubmitterHandle: detail.Submitter.Handler,
+		Documents:       documents,
+		Approvers:       approvers,
 		Aggregates: contract.ApprovalAggregates{
-			FileUploaded:     3,
-			ApprovalProgress: 33,
+			FileUploaded:     int(counts.FileUploaded),
+			ApprovalProgress: approvalProgress,
 		},
 	}, nil
 }
