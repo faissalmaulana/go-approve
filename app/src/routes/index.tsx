@@ -7,6 +7,7 @@ import { ProtectedLayout } from "@/components/protected-layout"
 import { requireAuth, requireGuest } from "@/lib/auth-loader"
 import { NewApprovalRoom } from "@/pages/new-approval-room-page"
 import { ApprovalRoomDetailPage } from "@/pages/approval-room-detail-page"
+import { ApproverRoomDetailPage } from "@/pages/approver-room-detail-page"
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
           {
             path: "/",
             Component: HomePage,
+          },
+          {
+            path: ":id",
+            Component: ApprovalRoomDetailPage,
           },
         ],
       },
@@ -35,10 +40,15 @@ const router = createBrowserRouter([
       {
         element: <ProtectedLayout />,
         loader: requireAuth,
+        path: "/approvers",
         children: [
           {
-            path: "/:id",
-            Component: ApprovalRoomDetailPage,
+            index: true,
+            element: <div>Approvers List</div>,
+          },
+          {
+            path: ":id",
+            Component: ApproverRoomDetailPage,
           },
         ],
       },
