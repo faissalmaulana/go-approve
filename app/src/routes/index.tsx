@@ -6,6 +6,7 @@ import { RegisterPage } from "@/pages/register-page"
 import { ProtectedLayout } from "@/components/protected-layout"
 import { requireAuth, requireGuest } from "@/lib/auth-loader"
 import { NewApprovalRoom } from "@/pages/new-approval-room-page"
+import { ApprovalRoomDetailPage } from "@/pages/approval-room-detail-page"
 
 const router = createBrowserRouter([
   {
@@ -31,7 +32,16 @@ const router = createBrowserRouter([
           },
         ],
       },
-
+      {
+        element: <ProtectedLayout />,
+        loader: requireAuth,
+        children: [
+          {
+            path: "/:id",
+            Component: ApprovalRoomDetailPage,
+          },
+        ],
+      },
       {
         path: "/login",
         loader: requireGuest,
