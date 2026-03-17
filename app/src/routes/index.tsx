@@ -8,6 +8,8 @@ import { requireAuth, requireGuest } from "@/lib/auth-loader"
 import { NewApprovalRoom } from "@/pages/new-approval-room-page"
 import { ApprovalRoomDetailPage } from "@/pages/approval-room-detail-page"
 import { ApproverRoomDetailPage } from "@/pages/approver-room-detail-page"
+import { InvitationsReceivedPage } from "@/pages/invitations-received-page"
+import { InvitationsSentPage } from "@/pages/invitations-sent-page"
 
 const router = createBrowserRouter([
   {
@@ -49,6 +51,21 @@ const router = createBrowserRouter([
           {
             path: ":id",
             Component: ApproverRoomDetailPage,
+          },
+        ],
+      },
+      {
+        element: <ProtectedLayout />,
+        loader: requireAuth,
+        path: "/invitations",
+        children: [
+          {
+            path: "sent",
+            Component: InvitationsSentPage,
+          },
+          {
+            path: "received",
+            Component: InvitationsReceivedPage,
           },
         ],
       },
