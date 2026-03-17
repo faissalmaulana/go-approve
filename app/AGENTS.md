@@ -106,6 +106,17 @@ src/
 
 ---
 
+## Routing
+
+Routes are defined in `src/routes/index.tsx` using React Router 7's `createBrowserRouter`. The file exports a `router` object that is used by `RouterProvider` in `App.tsx`.
+
+### Protected Routes
+All pages requiring authentication are wrapped inside the `ProtectedLayout` component (`src/components/protected-layout.tsx`). This layout includes the sidebar, header, and an `<Outlet />` for nested routes. Protected routes use the `requireAuth` loader to enforce authentication.
+
+Public routes (login, register) use the `requireGuest` loader to redirect authenticated users away.
+
+---
+
 ## Linting
 
 - ESLint is configured with:
