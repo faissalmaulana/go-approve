@@ -46,6 +46,7 @@ func main() {
 			handlers.NewLogoutHandler,
 			handlers.NewCreateApprovalRoomHandler,
 			handlers.NewGetUsersByUsernameHandler,
+			handlers.NewGetApprovalRoomByIdHandler,
 			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,

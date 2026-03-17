@@ -19,14 +19,15 @@ import (
 type EchoMuxParams struct {
 	fx.In
 
-	Health             *handlers.HealthHandler
-	Register           *handlers.RegisterHandler
-	Login              *handlers.LoginHandler
-	Profile            *handlers.UserProfileHandler
-	Logout             *handlers.LogoutHandler
-	Auth               *authMiddleware.AuthMiddleware
-	CreateApprovalRoom *handlers.CreateApprovalRoomHandler
-	GetUsersByUsername *handlers.GetUsersByUsernameHandler
+	Health              *handlers.HealthHandler
+	Register            *handlers.RegisterHandler
+	Login               *handlers.LoginHandler
+	Profile             *handlers.UserProfileHandler
+	Logout              *handlers.LogoutHandler
+	Auth                *authMiddleware.AuthMiddleware
+	CreateApprovalRoom  *handlers.CreateApprovalRoomHandler
+	GetApprovalRoomById *handlers.GetApprovalRoomByIdHandler
+	GetUsersByUsername  *handlers.GetUsersByUsernameHandler
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
@@ -65,6 +66,7 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	r.POST("/logout", p.Logout.HandleFunc)
 
 	r.POST("/approval-room", p.CreateApprovalRoom.HandleFunc)
+	r.GET("/approval-room/:id", p.GetApprovalRoomById.HandleFunc)
 
 	return e
 }

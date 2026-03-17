@@ -130,3 +130,26 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 		"new_approval_room_id": newApprovalRoomId,
 	}))
 }
+
+type GetApprovalRoomByIdHandler struct {
+	sugaredErrorMsg     *utils.SugaredErrorMessageValidator
+	approvalRoomService *approvalroom.ApprovalRoomService
+}
+
+func NewGetApprovalRoomByIdHandler(sgr *utils.SugaredErrorMessageValidator, ars *approvalroom.ApprovalRoomService) *GetApprovalRoomByIdHandler {
+	return &GetApprovalRoomByIdHandler{
+		sugaredErrorMsg:     sgr,
+		approvalRoomService: ars,
+	}
+}
+
+func (g *GetApprovalRoomByIdHandler) HandleFunc(c *echo.Context) error {
+	id := c.Param("id")
+
+	approvalRoom, err := g.approvalRoomService.GetApprovalRoomById(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+	}
+
+	return c.JSON(http.StatusOK, utils.SuccessResponse(approvalRoom))
+}

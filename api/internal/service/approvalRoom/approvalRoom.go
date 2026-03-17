@@ -2,6 +2,7 @@ package approvalroom
 
 import (
 	"context"
+	"time"
 
 	approvalroomrepository "github.com/faissalmaulana/go-approve/internal/repository/approvalRoom"
 	filemetadatarepository "github.com/faissalmaulana/go-approve/internal/repository/fileMetadata"
@@ -57,4 +58,51 @@ func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateAppr
 	}
 
 	return approvalRoomId, nil
+}
+
+func (a *ApprovalRoomService) GetApprovalRoomById(id string) (*contract.GetApprovalRoomByID, error) {
+	return &contract.GetApprovalRoomByID{
+		Title:           "FIFA World Cup 2026 Sponsorship Agreement",
+		CreatedAt:       time.Now(),
+		DueAt:           time.Now().Add(time.Hour * 72),
+		SubmitterHandle: "John Doe",
+		Documents: []contract.ApprovalDocument{
+			{
+				Link:            "localhost:8080/example.com",
+				DisplayFileName: "Sponsorship Agreement v3.pdf",
+				Size:            2048,
+			},
+			{
+				Link:            "localhost:8080/example.com",
+				DisplayFileName: "Budget Breakdown Q1.xlsx",
+				Size:            512,
+			},
+			{
+				Link:            "localhost:8080/example.com",
+				DisplayFileName: "Legal Terms Final.pdf",
+				Size:            1024,
+			},
+		},
+		Approvers: []contract.ApprovalApprover{
+			{
+				Handle:   "@sarah.connor",
+				Name:     "Sarah Connor",
+				Decision: "approved",
+			},
+			{
+				Handle:   "@michael.scott",
+				Name:     "Michael Scott",
+				Decision: "pending",
+			},
+			{
+				Handle:   "@tony.stark",
+				Name:     "Tony Stark",
+				Decision: "rejected",
+			},
+		},
+		Aggregates: contract.ApprovalAggregates{
+			FileUploaded:     3,
+			ApprovalProgress: 33,
+		},
+	}, nil
 }
