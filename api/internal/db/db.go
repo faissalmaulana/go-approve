@@ -26,7 +26,7 @@ func New(log *zap.Logger) *gorm.DB {
 		return db
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, dbname)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", username, password, host, port, dbname)
 
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
