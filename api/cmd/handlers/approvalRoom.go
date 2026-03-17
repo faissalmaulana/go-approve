@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/faissalmaulana/go-approve/cmd/dto"
+	"github.com/faissalmaulana/go-approve/internal/model"
 	"github.com/faissalmaulana/go-approve/internal/service"
 	approvalroom "github.com/faissalmaulana/go-approve/internal/service/approvalRoom"
 	contractapprovalroom "github.com/faissalmaulana/go-approve/internal/service/approvalRoom/contract"
@@ -69,6 +70,7 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 
 	files := form.File["documents"]
 	filepaths := make([]string, 0, len(files))
+	fileMetadatas := make(map[string]model.FileMetadata, len(files))
 	for _, file := range files {
 		src, err := file.Open()
 		if err != nil {
@@ -88,6 +90,11 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 		}
 
 		filepaths = append(filepaths, generatedfilepath)
+		fileMetadatas[file.Filename] = model.FileMetadata{
+			Link:     generatedfilepath,
+			Filename: file.Filename,
+			Size:     int(file.Size),
+		}
 	}
 
 	currentUser, err := a.user.GetCurrentUser(c.Request().Context(), claims.Subject)
@@ -107,11 +114,12 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 	}
 
 	newApprovalRoom := &contractapprovalroom.CreateApprovalRoom{
-		Title:       jsonCreateApprovalRoom.Title,
-		DueAt:       jsonCreateApprovalRoom.DueAt,
-		Filepaths:   filepaths,
-		SubmitterId: currentUser.ID,
-		InviteeIds:  approverIds,
+		Title:         jsonCreateApprovalRoom.Title,
+		DueAt:         jsonCreateApprovalRoom.DueAt,
+		Filepaths:     filepaths,
+		SubmitterId:   currentUser.ID,
+		InviteeIds:    approverIds,
+		FileMetadatas: fileMetadatas,
 	}
 
 	// CREATE ROOM

@@ -8,6 +8,7 @@ import (
 	"github.com/faissalmaulana/go-approve/internal/db"
 	approvalroomrepository "github.com/faissalmaulana/go-approve/internal/repository/approvalRoom"
 	"github.com/faissalmaulana/go-approve/internal/repository/blocklisttoken"
+	filemetadata "github.com/faissalmaulana/go-approve/internal/repository/fileMetadata"
 	requestreview "github.com/faissalmaulana/go-approve/internal/repository/requestReview"
 	"github.com/faissalmaulana/go-approve/internal/repository/transactions"
 	"github.com/faissalmaulana/go-approve/internal/repository/user"
@@ -34,6 +35,7 @@ func main() {
 			fx.Annotate(user.New, fx.As(new(user.UserStorage))),
 			fx.Annotate(approvalroomrepository.New, fx.As(new(approvalroomrepository.ApprovalRoomStorage))),
 			fx.Annotate(requestreview.New, fx.As(new(requestreview.RequestReviewStorage))),
+			fx.Annotate(filemetadata.New, fx.As(new(filemetadata.FileMetadataStorage))),
 			blocklisttoken.New,
 			userService.New,
 			approvalroom.New,

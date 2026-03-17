@@ -62,3 +62,21 @@ func (r *ReviewRequest) BeforeCreate(tx *gorm.DB) error {
 	r.ID = uuid.New().String()
 	return nil
 }
+
+type FileMetadata struct {
+	ID             string `json:"id"`
+	Link           string `json:"link"`
+	Filename       string `json:"filename"`
+	Size           int    `json:"size"`
+	ApprovalRoomId string `json:"approval_room_id"`
+}
+
+// somehow the gorm can't create the plural
+func (FileMetadata) TableName() string {
+	return "file_metadatas"
+}
+
+func (f *FileMetadata) BeforeCreate(tx *gorm.DB) error {
+	f.ID = uuid.New().String()
+	return nil
+}

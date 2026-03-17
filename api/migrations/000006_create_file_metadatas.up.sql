@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS file_metadatas(
+id VARCHAR(36) PRIMARY KEY,
+link VARCHAR(255) NOT NULL,
+filename VARCHAR(255) NOT NULL,
+size INTEGER NOT NULL,
+approval_room_id VARCHAR(36) NOT NULL,
+FOREIGN KEY (approval_room_id) REFERENCES approval_rooms(id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+);
