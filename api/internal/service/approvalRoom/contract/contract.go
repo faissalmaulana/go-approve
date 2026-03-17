@@ -9,7 +9,6 @@ import (
 type CreateApprovalRoom struct {
 	Title         string
 	DueAt         time.Time
-	Filepaths     []string
 	SubmitterId   string
 	InviteeIds    []string
 	FileMetadatas map[string]model.FileMetadata

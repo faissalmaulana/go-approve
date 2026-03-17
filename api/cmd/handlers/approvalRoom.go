@@ -69,7 +69,6 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 	}
 
 	files := form.File["documents"]
-	filepaths := make([]string, 0, len(files))
 	fileMetadatas := make(map[string]model.FileMetadata, len(files))
 	for _, file := range files {
 		src, err := file.Open()
@@ -89,7 +88,6 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		}
 
-		filepaths = append(filepaths, generatedfilepath)
 		fileMetadatas[file.Filename] = model.FileMetadata{
 			Link:     generatedfilepath,
 			Filename: file.Filename,
@@ -116,7 +114,6 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 	newApprovalRoom := &contractapprovalroom.CreateApprovalRoom{
 		Title:         jsonCreateApprovalRoom.Title,
 		DueAt:         jsonCreateApprovalRoom.DueAt,
-		Filepaths:     filepaths,
 		SubmitterId:   currentUser.ID,
 		InviteeIds:    approverIds,
 		FileMetadatas: fileMetadatas,

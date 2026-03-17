@@ -1,0 +1,1 @@
+ALTER TABLE approval_rooms ADD COLUMN filepaths MEDIUMTEXT NOT NULL;

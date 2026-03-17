@@ -27,7 +27,6 @@ type BlocklistToken struct {
 type ApprovalRoom struct {
 	ID          string     `json:"id"`
 	Title       string     `json:"title"`
-	Filepaths   string     `json:"filepaths"` // this is the raw form which is each filepath is seperated with ";"
 	DueAt       time.Time  `json:"due_at"`
 	SubmitterId string     `json:"submitter_id"`
 	CreatedAt   time.Time  `json:"created_at"`

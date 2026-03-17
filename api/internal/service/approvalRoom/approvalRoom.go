@@ -36,7 +36,6 @@ func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateAppr
 
 	createApprovalRoom := a.approvalRoomStorage.CreateWithTx(
 		i.Title,
-		i.Filepaths,
 		i.DueAt,
 		i.SubmitterId,
 		&approvalRoomId,
