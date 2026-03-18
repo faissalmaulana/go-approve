@@ -5,6 +5,7 @@ import (
 
 	"github.com/faissalmaulana/go-approve/internal/constant"
 	"github.com/faissalmaulana/go-approve/internal/model"
+	"github.com/faissalmaulana/go-approve/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,8 @@ type RequestReviewStorage interface {
 		requesterId string,
 		approvalRoomId *string,
 	) func(ctx context.Context, tx *gorm.DB) error
+	UpdateWithTx(id string, status utils.Status) func(ctx context.Context, tx *gorm.DB) error
+	GetById(ctx context.Context, id string) (model.ReviewRequest, error)
 }
 
 type RequestReviewRepository struct {
@@ -47,5 +50,20 @@ func (r *RequestReviewRepository) CreateBatchWithTx(
 		defer cancel()
 
 		return tx.Create(reviewRequests).Error
+	}
+}
+
+func (r *RequestReviewRepository) GetById(ctx context.Context, id string) (model.ReviewRequest, error) {
+	return gorm.G[model.ReviewRequest](r.db).Where("id = ?", id).First(ctx)
+}
+
+func (r *RequestReviewRepository) UpdateWithTx(id string, status utils.Status) func(ctx context.Context, tx *gorm.DB) error {
+
+	return func(ctx context.Context, tx *gorm.DB) error {
+		ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+		defer cancel()
+
+		_, err := gorm.G[model.ReviewRequest](tx).Where("id = ?", id).Update(ctx, "status", status.String())
+		return err
 	}
 }

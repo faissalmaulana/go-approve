@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { api, ApiError } from "@/lib/api"
 
 type InvitationStatus = "pending" | "accepted" | "rejected"
 
@@ -130,16 +131,36 @@ export function InvitationsReceivedPage() {
   const showingEnd = filtered.length
   const total = items.length
 
-  const handleAccept = (id: string) => {
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, status: "accepted" } : i))
-    )
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+
+  const handleAccept = async (id: string) => {
+    setLoadingId(id)
+    try {
+      await api.patch(`/request-review/${id}/confirm`, { status: "accepted" })
+      setItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, status: "accepted" } : i))
+      )
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Failed to accept request"
+      console.error(message)
+    } finally {
+      setLoadingId(null)
+    }
   }
 
-  const handleReject = (id: string) => {
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, status: "rejected" } : i))
-    )
+  const handleReject = async (id: string) => {
+    setLoadingId(id)
+    try {
+      await api.patch(`/request-review/${id}/confirm`, { status: "rejected" })
+      setItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, status: "rejected" } : i))
+      )
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Failed to reject request"
+      console.error(message)
+    } finally {
+      setLoadingId(null)
+    }
   }
 
   return (
@@ -250,15 +271,20 @@ export function InvitationsReceivedPage() {
                           </span>
                         ) : (
                           <div className="inline-flex items-center gap-2">
-                            <Button size="sm" onClick={() => handleAccept(inv.id)}>
-                              Accept
+                            <Button
+                              size="sm"
+                              onClick={() => handleAccept(inv.id)}
+                              disabled={loadingId !== null}
+                            >
+                              {loadingId === inv.id ? "Loading..." : "Accept"}
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => handleReject(inv.id)}
+                              disabled={loadingId !== null}
                             >
-                              Reject
+                              {loadingId === inv.id ? "Loading..." : "Reject"}
                             </Button>
                           </div>
                         )}

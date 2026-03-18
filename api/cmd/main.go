@@ -7,6 +7,7 @@ import (
 	"github.com/faissalmaulana/go-approve/cmd/middleware"
 	"github.com/faissalmaulana/go-approve/internal/db"
 	approvalroomrepository "github.com/faissalmaulana/go-approve/internal/repository/approvalRoom"
+	approvalroomapprover "github.com/faissalmaulana/go-approve/internal/repository/approvalRoomApprover"
 	"github.com/faissalmaulana/go-approve/internal/repository/blocklisttoken"
 	filemetadata "github.com/faissalmaulana/go-approve/internal/repository/fileMetadata"
 	requestreview "github.com/faissalmaulana/go-approve/internal/repository/requestReview"
@@ -15,6 +16,7 @@ import (
 	approvalroom "github.com/faissalmaulana/go-approve/internal/service/approvalRoom"
 	"github.com/faissalmaulana/go-approve/internal/service/auth"
 	"github.com/faissalmaulana/go-approve/internal/service/jwtfx"
+	requestReviewService "github.com/faissalmaulana/go-approve/internal/service/requestReview"
 	userService "github.com/faissalmaulana/go-approve/internal/service/user"
 	"github.com/faissalmaulana/go-approve/internal/utils"
 	"github.com/go-playground/validator/v10"
@@ -36,8 +38,10 @@ func main() {
 			fx.Annotate(approvalroomrepository.New, fx.As(new(approvalroomrepository.ApprovalRoomStorage))),
 			fx.Annotate(requestreview.New, fx.As(new(requestreview.RequestReviewStorage))),
 			fx.Annotate(filemetadata.New, fx.As(new(filemetadata.FileMetadataStorage))),
+			fx.Annotate(approvalroomapprover.New, fx.As(new(approvalroomapprover.ApprovalRoomApproverStorage))),
 			blocklisttoken.New,
 			userService.New,
+			requestReviewService.New,
 			approvalroom.New,
 			handlers.NewHealthHandler,
 			handlers.NewRegisterHandler,
@@ -48,6 +52,7 @@ func main() {
 			handlers.NewGetUsersByUsernameHandler,
 			handlers.NewGetApprovalRoomByIdHandler,
 			handlers.NewUpdateApprovalStatusHandler,
+			handlers.NewConfirmRequestReviewHandler,
 			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,

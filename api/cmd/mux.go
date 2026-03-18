@@ -29,6 +29,7 @@ type EchoMuxParams struct {
 	GetApprovalRoomById  *handlers.GetApprovalRoomByIdHandler
 	GetUsersByUsername   *handlers.GetUsersByUsernameHandler
 	UpdateApprovalStatus *handlers.UpdateApprovalStatusHandler
+	ConfirmRequestReview *handlers.ConfirmRequestReviewHandler
 }
 
 func NewEchoMux(p EchoMuxParams) http.Handler {
@@ -69,6 +70,8 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	r.POST("/approval-room", p.CreateApprovalRoom.HandleFunc)
 	r.GET("/approval-room/:id", p.GetApprovalRoomById.HandleFunc)
 	r.PATCH("/approval-room/:id/approvers/status", p.UpdateApprovalStatus.HandleFunc)
+
+	r.PUT("/request-review/:id/confirm", p.ConfirmRequestReview.HandleFunc)
 
 	return e
 }
