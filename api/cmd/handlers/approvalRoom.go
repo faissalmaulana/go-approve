@@ -146,7 +146,7 @@ func NewGetApprovalRoomByIdHandler(sgr *utils.SugaredErrorMessageValidator, ars 
 func (g *GetApprovalRoomByIdHandler) HandleFunc(c *echo.Context) error {
 	id := c.Param("id")
 
-	approvalRoom, err := g.approvalRoomService.GetApprovalRoomById(id)
+	approvalRoom, err := g.approvalRoomService.GetApprovalRoomById(c.Request().Context(), id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 	}

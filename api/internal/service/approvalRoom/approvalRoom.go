@@ -59,8 +59,7 @@ func (a *ApprovalRoomService) Create(ctx context.Context, i *contract.CreateAppr
 	return approvalRoomId, nil
 }
 
-func (a *ApprovalRoomService) GetApprovalRoomById(id string) (*contract.GetApprovalRoomByID, error) {
-	ctx := context.Background()
+func (a *ApprovalRoomService) GetApprovalRoomById(ctx context.Context, id string) (*contract.GetApprovalRoomByID, error) {
 
 	detail, err := a.approvalRoomStorage.GetApprovalRoomByID(ctx, id)
 	if err != nil {
