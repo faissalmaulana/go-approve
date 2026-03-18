@@ -153,3 +153,71 @@ func (g *GetApprovalRoomByIdHandler) HandleFunc(c *echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.SuccessResponse(approvalRoom))
 }
+
+type UpdateApprovalStatusHandler struct {
+	validate            *validator.Validate
+	sugaredErrorMsg     *utils.SugaredErrorMessageValidator
+	approvalRoomService *approvalroom.ApprovalRoomService
+	user                *user.User
+}
+
+func NewUpdateApprovalStatusHandler(
+	v *validator.Validate,
+	sgr *utils.SugaredErrorMessageValidator,
+	ars *approvalroom.ApprovalRoomService,
+	usr *user.User,
+) *UpdateApprovalStatusHandler {
+	return &UpdateApprovalStatusHandler{
+		validate:            v,
+		sugaredErrorMsg:     sgr,
+		approvalRoomService: ars,
+		user:                usr,
+	}
+}
+
+func (u *UpdateApprovalStatusHandler) HandleFunc(c *echo.Context) error {
+	token, err := echo.ContextGet[*jwt.Token](c, "user")
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, utils.ErrorResponse(err.Error()))
+	}
+
+	claims := token.Claims.(*jwt.RegisteredClaims)
+	if claims.Subject == "" {
+		return c.JSON(http.StatusUnauthorized, utils.ErrorResponse(service.ErrSubIsEmpty.Error()))
+	}
+
+	approvalRoomId := c.Param("id")
+
+	currentUser, err := u.user.GetCurrentUser(c.Request().Context(), claims.Subject)
+	if err != nil {
+		switch err {
+		case service.ErrUserNotFound:
+			return c.JSON(http.StatusNotFound, utils.ErrorResponse(err.Error()))
+		default:
+			return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err.Error()))
+		}
+	}
+
+	var updateStatusDTO = new(dto.UpdateApprovalStatusDTO)
+	if err := c.Bind(updateStatusDTO); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+	}
+
+	if err := u.validate.Struct(updateStatusDTO); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.ErrorResponse(u.sugaredErrorMsg.TranslateValidationErrors(err)))
+	}
+
+	err = u.approvalRoomService.UpdateApprovalDecision(
+		c.Request().Context(),
+		approvalRoomId,
+		currentUser.ID,
+		updateStatusDTO.Status,
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+	}
+
+	return c.JSON(http.StatusOK, utils.SuccessResponse(map[string]string{
+		"message": "Success update approval status",
+	}))
+}

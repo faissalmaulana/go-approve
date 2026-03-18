@@ -24,6 +24,7 @@ type ApprovalRoomStorage interface {
 	) func(ctx context.Context, tx *gorm.DB) error
 	GetApprovalRoomByID(ctx context.Context, id string) (*ApprovalRoomDetail, error)
 	GetApprovalRoomCountsByID(ctx context.Context, id string) (*ApprovalRoomCounts, error)
+	UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error
 }
 
 type ApprovalRoomRepository struct {
@@ -154,4 +155,13 @@ func (ar *ApprovalRoomRepository) GetApprovalRoomCountsByID(ctx context.Context,
 	counts.ApprovedCount = approved
 
 	return counts, nil
+}
+
+func (ar *ApprovalRoomRepository) UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	return ar.db.Model(&model.ApprovalRoomApprover{}).
+		Where("approval_room_id = ? AND approval_id = ?", approvalRoomId, approvalId).
+		Update("decision", decision).Error
 }

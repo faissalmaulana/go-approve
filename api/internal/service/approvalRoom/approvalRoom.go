@@ -108,3 +108,7 @@ func (a *ApprovalRoomService) GetApprovalRoomById(id string) (*contract.GetAppro
 		},
 	}, nil
 }
+
+func (a *ApprovalRoomService) UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error {
+	return a.approvalRoomStorage.UpdateApprovalDecision(ctx, approvalRoomId, approvalId, decision)
+}

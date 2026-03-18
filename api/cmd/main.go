@@ -47,6 +47,7 @@ func main() {
 			handlers.NewCreateApprovalRoomHandler,
 			handlers.NewGetUsersByUsernameHandler,
 			handlers.NewGetApprovalRoomByIdHandler,
+			handlers.NewUpdateApprovalStatusHandler,
 			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,

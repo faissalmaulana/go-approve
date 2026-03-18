@@ -7,3 +7,7 @@ type CreateApprovalRoomDTO struct {
 	DueAt     time.Time `json:"due_at" validate:"required"`
 	Approvers []string  `json:"approvers" validate:"required,gt=0,dive,required"`
 }
+
+type UpdateApprovalStatusDTO struct {
+	Status string `json:"status" validate:"required,oneof=approved rejected"`
+}

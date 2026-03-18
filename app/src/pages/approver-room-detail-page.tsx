@@ -9,7 +9,7 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empt
 import { buttonVariants } from "@/components/ui/button-variants";
 import { getAuthHeaders } from "@/lib/auth";
 import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import formatFileSize from "@/utils/formatfilesize";
 import { useUser } from "@/hooks/use-auth";
@@ -54,6 +54,29 @@ export function ApproverRoomDetailPage() {
       return response;
     },
     enabled: !!id,
+  });
+
+  const queryClient = useQueryClient();
+
+  const currentUserDecision = approvalRoom?.approvers.find(
+    (approver) => approver.handle === currentUser?.handler
+  )?.decision;
+
+  const updateApprovalStatus = useMutation({
+    mutationFn: async (status: "approved" | "rejected") => {
+      const response = await api.patch<{ message: string }>(
+        `/approval-room/${id}/approvers/status`,
+        { status },
+        { headers: getAuthHeaders() }
+      );
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["approval-room", id] });
+    },
+    onError: (error) => {
+      console.error(error)
+    },
   });
 
   if (isLoading && isLoadingCurrentUser) {
@@ -203,47 +226,77 @@ export function ApproverRoomDetailPage() {
           </div>
         </div>
         <div className="w-full grid justify-end">
-          <h2 className="text-xl font-medium mb-3">Submit Approver or Reject</h2>
-          <div className="border-2 rounded-lg p-4 flex gap-x-4">
-            <AlertDialog>
-              <AlertDialogTrigger>
-                <span className={cn(buttonVariants({ variant: "default" }), "p-5")}>
-                  Approve
-                </span>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Approval</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to approve this request?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => console.log("Approved")}>Confirm</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <AlertDialog>
-              <AlertDialogTrigger>
-                <span className={cn(buttonVariants({ variant: "destructive" }), "p-5")}>
-                  Reject
-                </span>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Rejection</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to reject this request?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => console.log("Rejected")}>Confirm</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+          {currentUserDecision && currentUserDecision !== "pending" ? (
+            <div className="border-2 rounded-lg p-4">
+              <p className="text-lg font-medium">
+                You have{" "}
+                <span
+                  className={cn(
+                    "capitalize font-bold",
+                    currentUserDecision === "approved" && "text-green-600",
+                    currentUserDecision === "rejected" && "text-red-600"
+                  )}
+                >
+                  {currentUserDecision}
+                </span>{" "}
+                this request
+              </p>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-xl font-medium mb-3">Submit Approver or Reject</h2>
+              <div className="border-2 rounded-lg p-4 flex gap-x-4">
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <span className={cn(buttonVariants({ variant: "default" }), "p-5")}>
+                      Approve
+                    </span>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Approval</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to approve this request?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => updateApprovalStatus.mutate("approved")}
+                        disabled={updateApprovalStatus.isPending}
+                      >
+                        {updateApprovalStatus.isPending ? "Processing..." : "Confirm"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <span className={cn(buttonVariants({ variant: "destructive" }), "p-5")}>
+                      Reject
+                    </span>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Rejection</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to reject this request?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => updateApprovalStatus.mutate("rejected")}
+                        disabled={updateApprovalStatus.isPending}
+                      >
+                        {updateApprovalStatus.isPending ? "Processing..." : "Confirm"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
