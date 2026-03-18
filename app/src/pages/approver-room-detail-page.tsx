@@ -7,6 +7,12 @@ import { Calendar, ChartColumnIncreasing, File, Paperclip, TrendingUp, Users } f
 import { cn } from "@/lib/utils";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { getAuthHeaders } from "@/lib/auth";
+import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router";
+import formatFileSize from "@/utils/formatfilesize";
+import { useUser } from "@/hooks/use-auth";
 
 interface Approver {
   name: string;
@@ -17,7 +23,7 @@ interface Approver {
 interface Document {
   link: string;
   display_file_name: string;
-  size: string;
+  size: number;
 }
 
 interface ApprovalRoom {
@@ -27,35 +33,54 @@ interface ApprovalRoom {
   due_at: string;
   documents: Document[];
   approvers: Approver[];
-  agregates: {
+  aggregates: {
     file_uploaded: number;
     approval_progress: number;
   };
 }
 
-const mockApprovalRoom: ApprovalRoom = {
-  title: "Q4 Marketing Request",
-  created_at: new Date().toISOString(),
-  submitter_handle: "@you",
-  due_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-  documents: [
-    { link: "/docs/marketing-q4.pdf", display_file_name: "Marketing_Q4_Plan.pdf", size: "2.4MB" },
-    { link: "/docs/budget.xlsx", display_file_name: "Budget_Allocation.xlsx", size: "1.2MB" },
-    { link: "/docs/timeline.pdf", display_file_name: "Campaign_Timeline.pdf", size: "850KB" },
-  ],
-  approvers: [
-    { name: "Lizzy MCalpine", handle: "@lizzymcalpine", decision: "pending" },
-    { name: "John Doe", handle: "@johndoe", decision: "approved" },
-    { name: "Jane Smith", handle: "@janesmith", decision: "rejected" },
-  ],
-  agregates: {
-    file_uploaded: 3,
-    approval_progress: 33,
-  },
-};
 
 export function ApproverRoomDetailPage() {
-  const { title, created_at, submitter_handle, due_at, documents, approvers, agregates } = mockApprovalRoom;
+  const { id } = useParams();
+
+  const { data: currentUser, isLoading: isLoadingCurrentUser } = useUser()
+
+  const { data: approvalRoom, isLoading, error } = useQuery({
+    queryKey: ["approval-room", id],
+    queryFn: async () => {
+      const response = await api.get<ApprovalRoom>(`/approval-room/${id}`, {
+        headers: getAuthHeaders(),
+      });
+      return response;
+    },
+    enabled: !!id,
+  });
+
+  if (isLoading && isLoadingCurrentUser) {
+    return (
+      <div className="m-7 shadow-sm">
+        <div className="bg-background p-6 space-y-6">
+          <div className="space-y-2">
+            <div className="h-9 w-96 bg-muted animate-pulse rounded" />
+            <div className="h-5 w-64 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !approvalRoom || !currentUser) {
+    return (
+      <div className="m-7 shadow-sm">
+        <div className="bg-background p-6">
+          <p className="text-red-500">Failed to load approval room details</p>
+        </div>
+      </div>
+    );
+  }
+
+
+  const { title, created_at, submitter_handle, due_at, documents, approvers, aggregates } = approvalRoom;
 
   return (
     <div className="m-7 shadow-sm">
@@ -65,7 +90,7 @@ export function ApproverRoomDetailPage() {
           <div className="flex items-center gap-x-4 text-muted-foreground">
             <p>Created On {new Date(created_at).toDateString()}</p>
             <span className="text-border">|</span>
-            <p>Submitting by {submitter_handle}</p>
+            <p>Submitting by {["@", submitter_handle].join("")}</p>
           </div>
         </div>
 
@@ -90,7 +115,7 @@ export function ApproverRoomDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-semibold">{agregates.file_uploaded} File(s)</div>
+              <div className="text-xl font-semibold">{aggregates.file_uploaded} File(s)</div>
             </CardContent>
           </Card>
 
@@ -103,13 +128,13 @@ export function ApproverRoomDetailPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex gap-x-4 justify-between items-end">
-                <div className="text-xl font-semibold">{agregates.approval_progress}%</div>
+                <div className="text-xl font-semibold">{aggregates.approval_progress}%</div>
                 <div className="font-semibold text-green-500 flex gap-x-1">
                   <TrendingUp />
-                  {agregates.approval_progress}%
+                  {aggregates.approval_progress}%
                 </div>
               </div>
-              <Progress value={agregates.approval_progress} />
+              <Progress value={aggregates.approval_progress} />
             </CardContent>
           </Card>
         </div>
@@ -126,7 +151,7 @@ export function ApproverRoomDetailPage() {
                     </ItemMedia>
                     <ItemContent>
                       <ItemTitle>{doc.display_file_name}</ItemTitle>
-                      <ItemDescription>{doc.size}</ItemDescription>
+                      <ItemDescription>{formatFileSize(doc.size)}</ItemDescription>
                     </ItemContent>
                   </Item>
                 ))}
@@ -147,7 +172,7 @@ export function ApproverRoomDetailPage() {
                 </Empty>
               ) : (
                 <div className="space-y-3">
-                  {approvers.map((approver, index) => (
+                  {approvers.filter((approver) => approver.handle !== currentUser.handler).map((approver, index) => (
                     <ItemGroup key={index}>
                       <Item className="gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-medium text-primary-foreground">
