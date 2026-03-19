@@ -43,6 +43,8 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	e.Use(echomiddleware.RequestLogger())
 	e.Use(echomiddleware.Recover())
 
+	e.Static("/files", "storage/private")
+
 	e.GET("/health", p.Health.HandleFunc)
 
 	e.POST("/auth/sign-up", p.Register.HandleFunc)

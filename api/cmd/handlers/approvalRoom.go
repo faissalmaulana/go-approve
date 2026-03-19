@@ -78,7 +78,8 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 
 		defer src.Close()
 
-		generatedfilepath := filepath.Join("storage", "private", utils.GenerateRandomFilename(file.Filename))
+		generatedFilename := utils.GenerateRandomFilename(file.Filename)
+		generatedfilepath := filepath.Join("storage", "private", generatedFilename)
 		dst, err := os.Create(generatedfilepath)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
@@ -89,7 +90,7 @@ func (a *CreateApprovalRoomHandler) HandleFunc(c *echo.Context) error {
 		}
 
 		fileMetadatas[file.Filename] = model.FileMetadata{
-			Link:     generatedfilepath,
+			Link:     generatedFilename,
 			Filename: file.Filename,
 			Size:     int(file.Size),
 		}

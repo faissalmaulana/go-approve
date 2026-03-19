@@ -1,5 +1,7 @@
 const API_BASE_URL = "http://localhost:8080"
 
+export const getFileUrl = (path: string) => `${API_BASE_URL}/files/${path}`
+
 class ApiError extends Error {
   status: number
   data?: unknown

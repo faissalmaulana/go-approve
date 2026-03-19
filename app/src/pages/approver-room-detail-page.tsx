@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { getAuthHeaders } from "@/lib/auth";
-import { api } from "@/lib/api";
+import { api, getFileUrl } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import formatFileSize from "@/utils/formatfilesize";
@@ -168,7 +168,7 @@ export function ApproverRoomDetailPage() {
             <div className="border-2 rounded-lg p-4">
               <ItemGroup>
                 {documents.map((doc, index) => (
-                  <Item key={index} render={<a href={doc.link} />}>
+                  <Item key={index} render={<a href={getFileUrl(doc.link)} />}>
                     <ItemMedia variant="icon">
                       <File className="w-12 h-12" />
                     </ItemMedia>
