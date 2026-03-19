@@ -110,8 +110,7 @@ export function HomePage() {
   const computedShowingEnd = rooms.length === 0 ? 0 : offset + rooms.length
 
   return (
-    <main className="min-h-dvh px-4 py-10">
-      <div className="mx-auto w-full max-w-4xl space-y-6">
+    <main className="m-7 space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
@@ -226,7 +225,6 @@ export function HomePage() {
             </div>
           </CardContent>
         </Card>
-      </div>
     </main>
   )
 }

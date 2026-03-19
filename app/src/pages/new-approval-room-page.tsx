@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
+import { Card, CardContent } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -176,8 +177,15 @@ export function NewApprovalRoom() {
   }
 
   return (
-    <div className="m-7 shadow-sm">
-      <form className="min-h-full bg-background p-6 space-y-8">
+    <div className="m-7 space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">New Approval Room</h1>
+        <p className="text-sm text-muted-foreground">Create a new approval room and invite approvers.</p>
+      </div>
+
+      <Card className="shadow-sm">
+        <CardContent className="pt-6">
+          <form className="space-y-8">
         <FieldGroup className="grid grid-cols-2">
           <Field>
             <FieldLabel htmlFor="title">Title</FieldLabel>
@@ -371,7 +379,9 @@ export function NewApprovalRoom() {
             </AlertDialogContent>
           </AlertDialog>
         </Field>
-      </form>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }
