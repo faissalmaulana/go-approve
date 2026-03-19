@@ -3,10 +3,10 @@ package requestreview
 import (
 	"context"
 
+	"github.com/faissalmaulana/go-approve/internal/model"
 	approvalroomapprover "github.com/faissalmaulana/go-approve/internal/repository/approvalRoomApprover"
 	requestreview "github.com/faissalmaulana/go-approve/internal/repository/requestReview"
 	"github.com/faissalmaulana/go-approve/internal/repository/transactions"
-	"github.com/faissalmaulana/go-approve/internal/model"
 	"github.com/faissalmaulana/go-approve/internal/utils"
 )
 
@@ -34,6 +34,16 @@ func (r *RequestReviewService) ConfirmRequestRevieWithInsertApprover(
 	requestReview, err := r.RequestReviewStorage.GetById(ctx, requestReviewId)
 	if err != nil {
 		return err
+	}
+
+	// Approvers reject invitation only
+	// updating the status
+	if status.String() == "rejected" {
+		if err := r.RequestReviewStorage.Update(ctx, requestReview.ID, status); err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 	requestReviewUpdateStatusTx := r.RequestReviewStorage.UpdateWithTx(requestReview.ID, status)

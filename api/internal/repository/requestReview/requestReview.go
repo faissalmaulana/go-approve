@@ -16,6 +16,7 @@ type RequestReviewStorage interface {
 		approvalRoomId *string,
 	) func(ctx context.Context, tx *gorm.DB) error
 	UpdateWithTx(id string, status utils.Status) func(ctx context.Context, tx *gorm.DB) error
+	Update(ctx context.Context, id string, status utils.Status) error
 	GetById(ctx context.Context, id string) (model.ReviewRequest, error)
 	GetReceivedInvitations(
 		ctx context.Context,
@@ -62,6 +63,14 @@ func (r *RequestReviewRepository) CreateBatchWithTx(
 
 func (r *RequestReviewRepository) GetById(ctx context.Context, id string) (model.ReviewRequest, error) {
 	return gorm.G[model.ReviewRequest](r.db).Where("id = ?", id).First(ctx)
+}
+
+func (r *RequestReviewRepository) Update(ctx context.Context, id string, status utils.Status) error {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	_, err := gorm.G[model.ReviewRequest](r.db).Where("id = ?", id).Update(ctx, "status", status.String())
+	return err
 }
 
 func (r *RequestReviewRepository) UpdateWithTx(id string, status utils.Status) func(ctx context.Context, tx *gorm.DB) error {
