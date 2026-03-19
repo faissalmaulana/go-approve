@@ -26,6 +26,7 @@ func (a *ApprovalRoomApproverRepository) CreateWithTx(approvalId, approvalRoomId
 	newApprovalRoomApprover := &model.ApprovalRoomApprover{
 		ApprovalId:     approvalId,
 		ApprovalRoomId: approvalRoomId,
+		Decision:       "pending",
 	}
 
 	return func(ctx context.Context, tx *gorm.DB) error {
