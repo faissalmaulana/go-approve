@@ -10,6 +10,7 @@ import { ApprovalRoomDetailPage } from "@/pages/approval-room-detail-page"
 import { ApproverRoomDetailPage } from "@/pages/approver-room-detail-page"
 import { InvitationsReceivedPage } from "@/pages/invitations-received-page"
 import { InvitationsSentPage } from "@/pages/invitations-sent-page"
+import { ApproversPage } from "@/pages/approvers-page"
 
 const router = createBrowserRouter([
   {
@@ -46,7 +47,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <div>Approvers List</div>,
+            element: <ApproversPage />,
           },
           {
             path: ":id",

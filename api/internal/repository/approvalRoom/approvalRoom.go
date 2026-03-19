@@ -32,6 +32,15 @@ type ApprovalRoomStorage interface {
 		limit int,
 		offset int,
 	) ([]model.ApprovalRoom, error)
+
+	GetApprovalRoomsByApprover(
+		ctx context.Context,
+		approverId string,
+		sortField string,
+		orderDir string,
+		limit int,
+		offset int,
+	) ([]ApproverInvitedApprovalRoomRequest, error)
 	UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error
 }
 
@@ -105,6 +114,15 @@ type ApprovalRoomCounts struct {
 	FileUploaded  int64
 	TotalApprover int64
 	ApprovedCount int64
+}
+
+type ApproverInvitedApprovalRoomRequest struct {
+	ID        string    `gorm:"column:id" json:"id"`
+	Title     string    `gorm:"column:title" json:"title"`
+	DueAt     time.Time `gorm:"column:due_at" json:"due_at"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	CreatedBy string    `gorm:"column:created_by" json:"created_by"`
+	Decision  string    `gorm:"column:decision" json:"decision"`
 }
 
 func (ar *ApprovalRoomRepository) GetApprovalRoomByID(ctx context.Context, id string) (*ApprovalRoomDetail, error) {
@@ -200,6 +218,52 @@ func (ar *ApprovalRoomRepository) GetApprovalRoomsBySubmitter(
 	err := q.Find(&rooms).Error
 
 	return rooms, err
+}
+
+func (ar *ApprovalRoomRepository) GetApprovalRoomsByApprover(
+	ctx context.Context,
+	approverId string,
+	sortField string,
+	orderDir string,
+	limit int,
+	offset int,
+) ([]ApproverInvitedApprovalRoomRequest, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	orderBy := "rooms.created_at desc"
+	switch sortField {
+	case "due_at":
+		orderBy = "rooms.due_at " + orderDir
+	case "created_at":
+		orderBy = "rooms.created_at " + orderDir
+	}
+
+	// orderDir is validated by the handler DTO, but keep a safe fallback.
+	if orderDir != "asc" && orderDir != "desc" {
+		orderBy = "rooms.created_at desc"
+	}
+
+	q := ar.db.WithContext(ctx).
+		Table("approval_room_approvers ara").
+		Select(
+			"ara.approval_room_id as id, rooms.title, rooms.due_at, rooms.created_at, submitter.handler as created_by, ara.decision as decision",
+		).
+		Joins("JOIN approval_rooms rooms ON rooms.id = ara.approval_room_id").
+		Joins("JOIN users submitter ON submitter.id = rooms.submitter_id").
+		Where("ara.approval_id = ?", approverId).
+		Order(orderBy)
+
+	if limit > 0 {
+		q = q.Limit(limit)
+	}
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
+
+	rows := make([]ApproverInvitedApprovalRoomRequest, 0)
+	err := q.Find(&rows).Error
+	return rows, err
 }
 
 func (ar *ApprovalRoomRepository) UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error {

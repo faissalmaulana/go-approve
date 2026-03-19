@@ -47,3 +47,12 @@ type ApprovalRoomRequest struct {
 	DueAt     time.Time `json:"due_at"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type ApproverInvitedApprovalRoomRequest struct {
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	DueAt       time.Time `json:"due_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	CreatedBy   string    `json:"created_by"`
+	Decision    string    `json:"decision"`
+}

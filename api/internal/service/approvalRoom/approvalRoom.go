@@ -144,3 +144,38 @@ func (a *ApprovalRoomService) GetApprovalRoomsBySubmitter(
 
 	return resp, nil
 }
+
+func (a *ApprovalRoomService) GetApproverInvitedApprovalRooms(
+	ctx context.Context,
+	approverId string,
+	sortField string,
+	orderDir string,
+	limit int,
+	offset int,
+) ([]contract.ApproverInvitedApprovalRoomRequest, error) {
+	rows, err := a.approvalRoomStorage.GetApprovalRoomsByApprover(
+		ctx,
+		approverId,
+		sortField,
+		orderDir,
+		limit,
+		offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([]contract.ApproverInvitedApprovalRoomRequest, 0, len(rows))
+	for _, r := range rows {
+		resp = append(resp, contract.ApproverInvitedApprovalRoomRequest{
+			ID:        r.ID,
+			Title:     r.Title,
+			DueAt:     r.DueAt,
+			CreatedAt: r.CreatedAt,
+			CreatedBy: r.CreatedBy,
+			Decision:  r.Decision,
+		})
+	}
+
+	return resp, nil
+}

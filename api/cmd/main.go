@@ -51,6 +51,7 @@ func main() {
 			handlers.NewCreateApprovalRoomHandler,
 			handlers.NewGetUsersByUsernameHandler,
 			handlers.NewGetApprovalRoomByIdHandler,
+			handlers.NewGetApproverInvitedApprovalRoomsHandler,
 			handlers.NewGetMyApprovalRoomsHandler,
 			handlers.NewUpdateApprovalStatusHandler,
 			handlers.NewConfirmRequestReviewHandler,
