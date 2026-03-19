@@ -11,7 +11,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar"
@@ -43,7 +42,6 @@ const navigationsData = {
         {
           title: "Received",
           url: "/invitations/received",
-          withBadge: true,
         },
       ]
     }
@@ -80,10 +78,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       {item.title}
                     </SidebarMenuButton>
-                    {item.withBadge && (
-                      <SidebarMenuBadge>25</SidebarMenuBadge>
-                    )
-                    }
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
