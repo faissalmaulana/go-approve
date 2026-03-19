@@ -2,10 +2,12 @@ import type { ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button-variants"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { api, ApiError } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { getAuthHeaders } from "@/lib/auth"
+import { Plus } from "lucide-react"
 
 type SortField = "due_at" | "created_at"
 type SortOrder = "asc" | "desc"
@@ -116,6 +118,10 @@ export function HomePage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link to="/new-approval-room" className={buttonVariants({ size: "lg" })}>
+            <Plus />
+          </Link>
+
           <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
             <FilterButton active={sort === "due_at"} onClick={() => setSortInUrl("due_at")}>
               Due At
