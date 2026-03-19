@@ -239,7 +239,6 @@ func (ar *ApprovalRoomRepository) GetApprovalRoomsByApprover(
 		orderBy = "rooms.created_at " + orderDir
 	}
 
-	// orderDir is validated by the handler DTO, but keep a safe fallback.
 	if orderDir != "asc" && orderDir != "desc" {
 		orderBy = "rooms.created_at desc"
 	}
