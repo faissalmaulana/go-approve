@@ -24,6 +24,14 @@ type ApprovalRoomStorage interface {
 	) func(ctx context.Context, tx *gorm.DB) error
 	GetApprovalRoomByID(ctx context.Context, id string) (*ApprovalRoomDetail, error)
 	GetApprovalRoomCountsByID(ctx context.Context, id string) (*ApprovalRoomCounts, error)
+	GetApprovalRoomsBySubmitter(
+		ctx context.Context,
+		submitterId string,
+		sortField string,
+		orderDir string,
+		limit int,
+		offset int,
+	) ([]model.ApprovalRoom, error)
 	UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error
 }
 
@@ -155,6 +163,43 @@ func (ar *ApprovalRoomRepository) GetApprovalRoomCountsByID(ctx context.Context,
 	counts.ApprovedCount = approved
 
 	return counts, nil
+}
+
+func (ar *ApprovalRoomRepository) GetApprovalRoomsBySubmitter(
+	ctx context.Context,
+	submitterId string,
+	sortField string,
+	orderDir string,
+	limit int,
+	offset int,
+) ([]model.ApprovalRoom, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	rooms := make([]model.ApprovalRoom, 0)
+	orderBy := "created_at desc"
+	switch sortField {
+	case "due_at":
+		orderBy = "due_at " + orderDir
+	case "created_at":
+		orderBy = "created_at " + orderDir
+	}
+
+	q := ar.db.WithContext(ctx).
+		Select("id,title,due_at,created_at").
+		Where("submitter_id = ?", submitterId).
+		Order(orderBy)
+
+	if limit > 0 {
+		q = q.Limit(limit)
+	}
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
+
+	err := q.Find(&rooms).Error
+
+	return rooms, err
 }
 
 func (ar *ApprovalRoomRepository) UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error {

@@ -40,3 +40,10 @@ type GetApprovalRoomByID struct {
 	Approvers       []ApprovalApprover `json:"approvers"`
 	Aggregates      ApprovalAggregates `json:"aggregates"`
 }
+
+type ApprovalRoomRequest struct {
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	DueAt     time.Time `json:"due_at"`
+	CreatedAt time.Time `json:"created_at"`
+}

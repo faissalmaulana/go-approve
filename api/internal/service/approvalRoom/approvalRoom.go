@@ -111,3 +111,36 @@ func (a *ApprovalRoomService) GetApprovalRoomById(ctx context.Context, id string
 func (a *ApprovalRoomService) UpdateApprovalDecision(ctx context.Context, approvalRoomId, approvalId, decision string) error {
 	return a.approvalRoomStorage.UpdateApprovalDecision(ctx, approvalRoomId, approvalId, decision)
 }
+
+func (a *ApprovalRoomService) GetApprovalRoomsBySubmitter(
+	ctx context.Context,
+	submitterId string,
+	sortField string,
+	orderDir string,
+	limit int,
+	offset int,
+) ([]contract.ApprovalRoomRequest, error) {
+	rooms, err := a.approvalRoomStorage.GetApprovalRoomsBySubmitter(
+		ctx,
+		submitterId,
+		sortField,
+		orderDir,
+		limit,
+		offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([]contract.ApprovalRoomRequest, 0, len(rooms))
+	for _, r := range rooms {
+		resp = append(resp, contract.ApprovalRoomRequest{
+			ID:        r.ID,
+			Title:     r.Title,
+			DueAt:     r.DueAt,
+			CreatedAt: r.CreatedAt,
+		})
+	}
+
+	return resp, nil
+}

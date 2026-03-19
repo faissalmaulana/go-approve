@@ -27,6 +27,7 @@ type EchoMuxParams struct {
 	Auth                 *authMiddleware.AuthMiddleware
 	CreateApprovalRoom   *handlers.CreateApprovalRoomHandler
 	GetApprovalRoomById  *handlers.GetApprovalRoomByIdHandler
+	GetMyApprovalRooms   *handlers.GetMyApprovalRoomsHandler
 	GetUsersByUsername   *handlers.GetUsersByUsernameHandler
 	UpdateApprovalStatus *handlers.UpdateApprovalStatusHandler
 	ConfirmRequestReview *handlers.ConfirmRequestReviewHandler
@@ -71,6 +72,7 @@ func NewEchoMux(p EchoMuxParams) http.Handler {
 	r.POST("/logout", p.Logout.HandleFunc)
 
 	r.POST("/approval-room", p.CreateApprovalRoom.HandleFunc)
+	r.GET("/approval-room", p.GetMyApprovalRooms.HandleFunc)
 	r.GET("/approval-room/:id", p.GetApprovalRoomById.HandleFunc)
 	r.PATCH("/approval-room/:id/approvers/status", p.UpdateApprovalStatus.HandleFunc)
 
