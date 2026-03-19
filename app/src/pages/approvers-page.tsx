@@ -5,7 +5,6 @@ import { Link, useSearchParams } from "react-router"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { api, ApiError } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -158,97 +157,88 @@ export function ApproversPage() {
         </div>
       </div>
 
-      <Card className="shadow-sm">
-        <CardHeader className="border-b">
-          <CardTitle className="text-base">Invited Approvals</CardTitle>
-        </CardHeader>
+      {isLoading && (
+        <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
+      )}
+      {error && (
+        <div className="pb-4 text-sm text-red-600">
+          {error instanceof ApiError ? error.message : "Failed to load invitations"}
+        </div>
+      )}
 
-        <CardContent className="pt-4">
-          {isLoading && (
-            <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
-          )}
-          {error && (
-            <div className="pb-4 text-sm text-red-600">
-              {error instanceof ApiError ? error.message : "Failed to load invitations"}
-            </div>
-          )}
+      <div className="rounded-lg border overflow-hidden">
+        <Table className="bg-background">
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="px-4">TITLE</TableHead>
+              <TableHead>DUE AT</TableHead>
+              <TableHead>CREATED AT</TableHead>
+              <TableHead>CREATED BY</TableHead>
+              <TableHead>DECISION</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rooms.map((room) => (
+              <TableRow key={room.id}>
+                <TableCell className="px-4">
+                  <Link
+                    to={`/approvers/${room.id}`}
+                    className="block max-w-[260px] truncate font-medium text-primary hover:underline"
+                    title={room.title}
+                  >
+                    {room.title}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{formatDateTime(room.due_at)}</TableCell>
+                <TableCell className="text-muted-foreground">{formatDateTime(room.created_at)}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {["@", room.created_by].join("")}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={cn("capitalize px-3 py-1", statusBadgeClassName(room.decision))}
+                  >
+                    {statusLabel(room.decision)}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
 
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead className="px-4">TITLE</TableHead>
-                  <TableHead>DUE AT</TableHead>
-                  <TableHead>CREATED AT</TableHead>
-                  <TableHead>CREATED BY</TableHead>
-                  <TableHead>DECISION</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rooms.map((room) => (
-                  <TableRow key={room.id}>
-                    <TableCell className="px-4">
-                      <Link
-                        to={`/approvers/${room.id}`}
-                        className="block max-w-[260px] truncate font-medium text-primary hover:underline"
-                        title={room.title}
-                      >
-                        {room.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDateTime(room.due_at)}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDateTime(room.created_at)}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {["@", room.created_by].join("")}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={cn("capitalize px-3 py-1", statusBadgeClassName(room.decision))}
-                      >
-                        {statusLabel(room.decision)}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+            {!isLoading && rooms.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No invited approvals found.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-                {!isLoading && rooms.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-10 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        No invited approvals found.
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-            <div>Showing {computedShowingStart}-{computedShowingEnd} requests</div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!canPrevious || isLoading}
-                onClick={() => setOffsetInUrl(offset - limit)}
-              >
-                Previous
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!canNext || isLoading}
-                onClick={() => setOffsetInUrl(offset + limit)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+        <div>Showing {computedShowingStart}-{computedShowingEnd} requests</div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canPrevious || isLoading}
+            onClick={() => setOffsetInUrl(offset - limit)}
+          >
+            Previous
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canNext || isLoading}
+            onClick={() => setOffsetInUrl(offset + limit)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </main>
   )
 }
-

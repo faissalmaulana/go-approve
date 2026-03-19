@@ -1,8 +1,6 @@
 import type { ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useSearchParams } from "react-router"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { api, ApiError } from "@/lib/api"
@@ -111,120 +109,113 @@ export function HomePage() {
 
   return (
     <main className="m-7 space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
-            <p className="text-sm text-muted-foreground">Review approval rooms you created.</p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
-              <FilterButton active={sort === "due_at"} onClick={() => setSortInUrl("due_at")}>
-                Due At
-              </FilterButton>
-              <FilterButton active={sort === "created_at"} onClick={() => setSortInUrl("created_at")}>
-                Created At
-              </FilterButton>
-            </div>
-
-            <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
-              <FilterButton active={order === "desc"} onClick={() => setOrderInUrl("desc")}>
-                Latest
-              </FilterButton>
-              <FilterButton active={order === "asc"} onClick={() => setOrderInUrl("asc")}>
-                Oldest
-              </FilterButton>
-            </div>
-          </div>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
+          <p className="text-sm text-muted-foreground">Review approval rooms you created.</p>
         </div>
 
-        <Card className="shadow-sm">
-          <CardHeader className="border-b">
-            <CardTitle className="text-base">Requests</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
+            <FilterButton active={sort === "due_at"} onClick={() => setSortInUrl("due_at")}>
+              Due At
+            </FilterButton>
+            <FilterButton active={sort === "created_at"} onClick={() => setSortInUrl("created_at")}>
+              Created At
+            </FilterButton>
+          </div>
 
-            {isLoading && (
-              <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
+          <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
+            <FilterButton active={order === "desc"} onClick={() => setOrderInUrl("desc")}>
+              Latest
+            </FilterButton>
+            <FilterButton active={order === "asc"} onClick={() => setOrderInUrl("asc")}>
+              Oldest
+            </FilterButton>
+          </div>
+        </div>
+      </div>
+
+
+      {isLoading && (
+        <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
+      )}
+      {error && (
+        <div className="pb-4 text-sm text-red-600">
+          {error instanceof ApiError
+            ? error.message
+            : "Failed to load approval rooms"}
+        </div>
+      )}
+
+      <div className="rounded-lg border overflow-hidden">
+        <Table className="bg-background">
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="px-4">TITLE</TableHead>
+              <TableHead>DUE AT</TableHead>
+              <TableHead>CREATED AT</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rooms.map((room) => (
+              <TableRow key={room.id}>
+                <TableCell className="px-4">
+                  <Link
+                    to={`/${room.id}`}
+                    className="block max-w-[260px] truncate font-medium text-primary hover:underline"
+                    title={room.title}
+                  >
+                    {room.title}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  <Link to={`/${room.id}`} className="hover:underline">
+                    {formatDateTime(room.due_at)}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  <Link to={`/${room.id}`} className="hover:underline">
+                    {formatDateTime(room.created_at)}
+                  </Link>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {!isLoading && rooms.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} className="py-10 text-center">
+                  <p className="text-sm text-muted-foreground">No approval rooms found.</p>
+                </TableCell>
+              </TableRow>
             )}
-            {error && (
-              <div className="pb-4 text-sm text-red-600">
-                {error instanceof ApiError
-                  ? error.message
-                  : "Failed to load approval rooms"}
-              </div>
-            )}
+          </TableBody>
+        </Table>
+      </div>
 
-            <div className="rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30">
-                    <TableHead className="px-4">TITLE</TableHead>
-                    <TableHead>DUE AT</TableHead>
-                    <TableHead>CREATED AT</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rooms.map((room) => (
-                    <TableRow key={room.id}>
-                      <TableCell className="px-4">
-                        <Link
-                          to={`/${room.id}`}
-                          className="block max-w-[260px] truncate font-medium text-primary hover:underline"
-                          title={room.title}
-                        >
-                          {room.title}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <Link to={`/${room.id}`} className="hover:underline">
-                          {formatDateTime(room.due_at)}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <Link to={`/${room.id}`} className="hover:underline">
-                          {formatDateTime(room.created_at)}
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-
-                  {!isLoading && rooms.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={3} className="py-10 text-center">
-                        <p className="text-sm text-muted-foreground">No approval rooms found.</p>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-              <div>
-                Showing {computedShowingStart}-{computedShowingEnd} requests
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!canPrevious || isLoading}
-                  onClick={() => setOffsetInUrl(offset - limit)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!canNext || isLoading}
-                  onClick={() => setOffsetInUrl(offset + limit)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+        <div>
+          Showing {computedShowingStart}-{computedShowingEnd} requests
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canPrevious || isLoading}
+            onClick={() => setOffsetInUrl(offset - limit)}
+          >
+            Previous
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canNext || isLoading}
+            onClick={() => setOffsetInUrl(offset + limit)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </main>
   )
 }

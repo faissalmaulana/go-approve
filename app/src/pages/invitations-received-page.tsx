@@ -6,13 +6,6 @@ import { useSearchParams } from "react-router"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Table,
   TableBody,
   TableCell,
@@ -238,139 +231,132 @@ export function InvitationsReceivedPage() {
         </div>
       </div>
 
-      <Card className="shadow-sm">
-        <CardHeader className="border-b">
-          <CardTitle className="text-base">Requests</CardTitle>
-          <CardDescription>Incoming invitations awaiting your action.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          {isLoading && (
-            <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
-          )}
-          {error && (
-            <div className="pb-4 text-sm text-red-600">
-              Failed to load invitations
-            </div>
-          )}
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead className="px-4">STATUS</TableHead>
-                  <TableHead>ROOM ID</TableHead>
-                  <TableHead>REQUESTED BY</TableHead>
-                  <TableHead>DATE CREATED</TableHead>
-                  <TableHead className="text-right pr-4">ACTIONS</TableHead>
-                </TableRow>
-              </TableHeader>
 
-              <TableBody>
-                {filtered.map((inv) => {
-                  const isDone = inv.status !== "pending"
+      {isLoading && (
+        <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
+      )}
+      {error && (
+        <div className="pb-4 text-sm text-red-600">
+          Failed to load invitations
+        </div>
+      )}
+      <div className="rounded-lg border overflow-hidden">
+        <Table className="bg-background">
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="px-4">STATUS</TableHead>
+              <TableHead>ROOM ID</TableHead>
+              <TableHead>REQUESTED BY</TableHead>
+              <TableHead>DATE CREATED</TableHead>
+              <TableHead className="text-right pr-4">ACTIONS</TableHead>
+            </TableRow>
+          </TableHeader>
 
-                  return (
-                    <TableRow key={inv.id}>
-                      <TableCell className="px-4">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "capitalize px-3 py-1",
-                            statusBadgeClassName(inv.status)
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "mr-2 inline-block h-1.5 w-1.5 rounded-full",
-                              inv.status === "pending" && "bg-yellow-500",
-                              inv.status === "accepted" && "bg-green-500",
-                              inv.status === "rejected" && "bg-red-500"
-                            )}
-                          />
-                          {statusLabel(inv.status)}
-                        </Badge>
-                      </TableCell>
+          <TableBody>
+            {filtered.map((inv) => {
+              const isDone = inv.status !== "pending"
 
-                      <TableCell className="font-medium text-muted-foreground">
-                        {inv.roomId}
-                      </TableCell>
-
-                      <TableCell>
-                        <span className="text-sm text-foreground">
-                          {['@', inv.requestedBy.handle].join("")}
-                        </span>
-                      </TableCell>
-
-                      <TableCell className="text-muted-foreground">
-                        {formatDateTime(inv.createdAt)}
-                      </TableCell>
-
-                      <TableCell className="text-right pr-4">
-                        {isDone ? (
-                          <span className="text-sm italic text-muted-foreground">
-                            Action completed
-                          </span>
-                        ) : (
-                          <div className="inline-flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleAccept(inv.id)}
-                              disabled={loadingId !== null}
-                            >
-                              {loadingId === inv.id ? "Loading..." : "Accept"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleReject(inv.id)}
-                              disabled={loadingId !== null}
-                            >
-                              {loadingId === inv.id ? "Loading..." : "Reject"}
-                            </Button>
-                          </div>
+              return (
+                <TableRow key={inv.id}>
+                  <TableCell className="px-4">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "capitalize px-3 py-1",
+                        statusBadgeClassName(inv.status)
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "mr-2 inline-block h-1.5 w-1.5 rounded-full",
+                          inv.status === "pending" && "bg-yellow-500",
+                          inv.status === "accepted" && "bg-green-500",
+                          inv.status === "rejected" && "bg-red-500"
                         )}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
+                      />
+                      {statusLabel(inv.status)}
+                    </Badge>
+                  </TableCell>
 
-                {filtered.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-10 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        No requests found.
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  <TableCell className="font-medium text-muted-foreground">
+                    {inv.roomId}
+                  </TableCell>
 
-          <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-            <div>
-              Showing {showingStart}-{showingEnd} requests
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!canPrevious || isLoading}
-                onClick={() => setOffsetInUrl(offset - limit)}
-              >
-                Previous
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!canNext || isLoading}
-                onClick={() => setOffsetInUrl(offset + limit)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                  <TableCell>
+                    <span className="text-sm text-foreground">
+                      {['@', inv.requestedBy.handle].join("")}
+                    </span>
+                  </TableCell>
+
+                  <TableCell className="text-muted-foreground">
+                    {formatDateTime(inv.createdAt)}
+                  </TableCell>
+
+                  <TableCell className="text-right pr-4">
+                    {isDone ? (
+                      <span className="text-sm italic text-muted-foreground">
+                        Action completed
+                      </span>
+                    ) : (
+                      <div className="inline-flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAccept(inv.id)}
+                          disabled={loadingId !== null}
+                        >
+                          {loadingId === inv.id ? "Loading..." : "Accept"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleReject(inv.id)}
+                          disabled={loadingId !== null}
+                        >
+                          {loadingId === inv.id ? "Loading..." : "Reject"}
+                        </Button>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+
+            {filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No requests found.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+        <div>
+          Showing {showingStart}-{showingEnd} requests
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canPrevious || isLoading}
+            onClick={() => setOffsetInUrl(offset - limit)}
+          >
+            Previous
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canNext || isLoading}
+            onClick={() => setOffsetInUrl(offset + limit)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -2,16 +2,8 @@ import type { ReactNode } from "react"
 import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useSearchParams } from "react-router"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -196,108 +188,102 @@ export function InvitationsSentPage() {
         </div>
       </div>
 
-      <Card className="shadow-sm">
-        <CardHeader className="border-b">
-          <CardTitle className="text-base">Invitations</CardTitle>
-          <CardDescription>Invitations you have sent to reviewers.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          {isLoading && (
-            <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
-          )}
-          {error && (
-            <div className="pb-4 text-sm text-red-600">
-              Failed to load invitations
-            </div>
-          )}
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead className="px-4">STATUS</TableHead>
-                  <TableHead>ROOM ID</TableHead>
-                  <TableHead>INVITED USER</TableHead>
-                  <TableHead>DATE CREATED</TableHead>
-                </TableRow>
-              </TableHeader>
 
-              <TableBody>
-                {filtered.map((inv) => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="px-4">
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "capitalize px-3 py-1",
-                          statusBadgeClassName(inv.status)
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "mr-2 inline-block h-1.5 w-1.5 rounded-full",
-                            inv.status === "pending" && "bg-yellow-500",
-                            inv.status === "accepted" && "bg-green-500",
-                            inv.status === "rejected" && "bg-red-500"
-                          )}
-                        />
-                        {statusLabel(inv.status)}
-                      </Badge>
-                    </TableCell>
+      {isLoading && (
+        <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
+      )}
+      {error && (
+        <div className="pb-4 text-sm text-red-600">
+          Failed to load invitations
+        </div>
+      )}
+      <div className="rounded-lg border overflow-hidden">
+        <Table className="bg-background">
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="px-4">STATUS</TableHead>
+              <TableHead>ROOM ID</TableHead>
+              <TableHead>INVITED USER</TableHead>
+              <TableHead>DATE CREATED</TableHead>
+            </TableRow>
+          </TableHeader>
 
-                    <TableCell className="font-medium text-muted-foreground">
-                      {inv.roomId}
-                    </TableCell>
+          <TableBody>
+            {filtered.map((inv) => (
+              <TableRow key={inv.id}>
+                <TableCell className="px-4">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "capitalize px-3 py-1",
+                      statusBadgeClassName(inv.status)
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "mr-2 inline-block h-1.5 w-1.5 rounded-full",
+                        inv.status === "pending" && "bg-yellow-500",
+                        inv.status === "accepted" && "bg-green-500",
+                        inv.status === "rejected" && "bg-red-500"
+                      )}
+                    />
+                    {statusLabel(inv.status)}
+                  </Badge>
+                </TableCell>
 
-                    <TableCell>
-                      <span className="text-sm text-foreground">
-                        {['@', inv.invitee.handle].join("")}
-                      </span>
-                    </TableCell>
+                <TableCell className="font-medium text-muted-foreground">
+                  {inv.roomId}
+                </TableCell>
 
-                    <TableCell className="text-muted-foreground">
-                      {formatDateTime(inv.createdAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                <TableCell>
+                  <span className="text-sm text-foreground">
+                    {['@', inv.invitee.handle].join("")}
+                  </span>
+                </TableCell>
 
-                {filtered.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="py-10 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        No invitations found.
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                <TableCell className="text-muted-foreground">
+                  {formatDateTime(inv.createdAt)}
+                </TableCell>
+              </TableRow>
+            ))}
 
-          <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-            <div>
-              Showing {showingStart}-{showingEnd} invitations
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!canPrevious || isLoading}
-                onClick={() => setOffsetInUrl(offset - limit)}
-              >
-                Previous
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!canNext || isLoading}
-                onClick={() => setOffsetInUrl(offset + limit)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            {filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="py-10 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No invitations found.
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+        <div>
+          Showing {showingStart}-{showingEnd} invitations
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canPrevious || isLoading}
+            onClick={() => setOffsetInUrl(offset - limit)}
+          >
+            Previous
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!canNext || isLoading}
+            onClick={() => setOffsetInUrl(offset + limit)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+
     </div>
   )
 }
