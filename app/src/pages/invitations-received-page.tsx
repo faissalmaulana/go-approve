@@ -103,7 +103,7 @@ export function InvitationsReceivedPage() {
     room_id: string
     status: InvitationStatus
     created_at: string
-    requested_by: {
+    user: {
       id: string
       name: string
       handler: string
@@ -145,8 +145,8 @@ export function InvitationsReceivedPage() {
         createdAt: r.created_at,
         status: r.status,
         requestedBy: {
-          name: r.requested_by.name,
-          handle: r.requested_by.handler,
+          name: r.user.name,
+          handle: r.user.handler,
         },
       }))
     },

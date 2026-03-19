@@ -68,9 +68,6 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 	if as == "" {
 		as = "received"
 	}
-	if as != "received" {
-		return c.JSON(http.StatusNotImplemented, utils.ErrorResponse("only received invitations is supported"))
-	}
 
 	var status *utils.Status
 	if q.Status != "" {
@@ -99,7 +96,50 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 		offset = 0
 	}
 
-	items, err := g.requestReviewService.GetReceivedInvitations(
+	type invitedUser struct {
+		ID      string `json:"id"`
+		Name    string `json:"name"`
+		Handler string `json:"handler"`
+	}
+	type responseRow struct {
+		ID        string      `json:"id"`
+		RoomID    string      `json:"room_id"`
+		Status    string      `json:"status"`
+		CreatedAt string      `json:"created_at"`
+		User      invitedUser `json:"user"`
+	}
+
+	if as == "received" {
+		items, err := g.requestReviewService.GetReceivedInvitations(
+			c.Request().Context(),
+			currentUser.ID,
+			status,
+			limit,
+			offset,
+		)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err.Error()))
+		}
+
+		resp := make([]responseRow, 0, len(items))
+		for _, it := range items {
+			resp = append(resp, responseRow{
+				ID:        it.ID,
+				RoomID:    it.ApprovalRoomId,
+				Status:    it.Status,
+				CreatedAt: it.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+				User: invitedUser{
+					ID:      it.Requester.ID,
+					Name:    it.Requester.Name,
+					Handler: it.Requester.Handler,
+				},
+			})
+		}
+
+		return c.JSON(http.StatusOK, utils.SuccessResponse(resp))
+	}
+
+	items, err := g.requestReviewService.GetSentInvitations(
 		c.Request().Context(),
 		currentUser.ID,
 		status,
@@ -110,19 +150,6 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err.Error()))
 	}
 
-	type requestedBy struct {
-		ID      string `json:"id"`
-		Name    string `json:"name"`
-		Handler string `json:"handler"`
-	}
-	type responseRow struct {
-		ID        string      `json:"id"`
-		RoomID    string      `json:"room_id"`
-		Status    string      `json:"status"`
-		CreatedAt string      `json:"created_at"`
-		Requested requestedBy `json:"requested_by"`
-	}
-
 	resp := make([]responseRow, 0, len(items))
 	for _, it := range items {
 		resp = append(resp, responseRow{
@@ -130,14 +157,13 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 			RoomID:    it.ApprovalRoomId,
 			Status:    it.Status,
 			CreatedAt: it.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-			Requested: requestedBy{
-				ID:      it.Requester.ID,
-				Name:    it.Requester.Name,
-				Handler: it.Requester.Handler,
+			User: invitedUser{
+				ID:      it.Invitee.ID,
+				Name:    it.Invitee.Name,
+				Handler: it.Invitee.Handler,
 			},
 		})
 	}
 
 	return c.JSON(http.StatusOK, utils.SuccessResponse(resp))
 }
-

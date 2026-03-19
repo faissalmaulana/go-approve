@@ -25,6 +25,13 @@ type RequestReviewStorage interface {
 		limit int,
 		offset int,
 	) ([]model.ReviewRequest, error)
+	GetSentInvitations(
+		ctx context.Context,
+		requesterId string,
+		status *utils.Status,
+		limit int,
+		offset int,
+	) ([]model.ReviewRequest, error)
 }
 
 type RequestReviewRepository struct {
@@ -97,6 +104,34 @@ func (r *RequestReviewRepository) GetReceivedInvitations(
 	q := gorm.G[model.ReviewRequest](r.db).
 		Where("invitee_id = ?", inviteeId).
 		Preload("Requester", nil)
+
+	if status != nil {
+		q = q.Where("status = ?", status.String())
+	}
+
+	if limit > 0 {
+		q = q.Limit(limit)
+	}
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
+
+	return q.Order("created_at desc").Find(ctx)
+}
+
+func (r *RequestReviewRepository) GetSentInvitations(
+	ctx context.Context,
+	requesterId string,
+	status *utils.Status,
+	limit int,
+	offset int,
+) ([]model.ReviewRequest, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	q := gorm.G[model.ReviewRequest](r.db).
+		Where("requester_id = ?", requesterId).
+		Preload("Invitee", nil)
 
 	if status != nil {
 		q = q.Where("status = ?", status.String())

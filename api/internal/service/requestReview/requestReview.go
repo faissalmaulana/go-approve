@@ -62,3 +62,13 @@ func (r *RequestReviewService) GetReceivedInvitations(
 ) ([]model.ReviewRequest, error) {
 	return r.RequestReviewStorage.GetReceivedInvitations(ctx, inviteeId, status, limit, offset)
 }
+
+func (r *RequestReviewService) GetSentInvitations(
+	ctx context.Context,
+	requesterId string,
+	status *utils.Status,
+	limit int,
+	offset int,
+) ([]model.ReviewRequest, error) {
+	return r.RequestReviewStorage.GetSentInvitations(ctx, requesterId, status, limit, offset)
+}
