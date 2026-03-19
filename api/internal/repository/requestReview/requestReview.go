@@ -17,6 +17,13 @@ type RequestReviewStorage interface {
 	) func(ctx context.Context, tx *gorm.DB) error
 	UpdateWithTx(id string, status utils.Status) func(ctx context.Context, tx *gorm.DB) error
 	GetById(ctx context.Context, id string) (model.ReviewRequest, error)
+	GetReceivedInvitations(
+		ctx context.Context,
+		inviteeId string,
+		status *utils.Status,
+		limit int,
+		offset int,
+	) ([]model.ReviewRequest, error)
 }
 
 type RequestReviewRepository struct {
@@ -66,4 +73,32 @@ func (r *RequestReviewRepository) UpdateWithTx(id string, status utils.Status) f
 		_, err := gorm.G[model.ReviewRequest](tx).Where("id = ?", id).Update(ctx, "status", status.String())
 		return err
 	}
+}
+
+func (r *RequestReviewRepository) GetReceivedInvitations(
+	ctx context.Context,
+	inviteeId string,
+	status *utils.Status,
+	limit int,
+	offset int,
+) ([]model.ReviewRequest, error) {
+	ctx, cancel := context.WithTimeout(ctx, constant.QueryTimeout)
+	defer cancel()
+
+	q := gorm.G[model.ReviewRequest](r.db).
+		Where("invitee_id = ?", inviteeId).
+		Preload("Requester", nil)
+
+	if status != nil {
+		q = q.Where("status = ?", status.String())
+	}
+
+	if limit > 0 {
+		q = q.Limit(limit)
+	}
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
+
+	return q.Order("created_at desc").Find(ctx)
 }

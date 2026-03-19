@@ -59,6 +59,8 @@ type ReviewRequest struct {
 	ApprovalRoomId string    `json:"approval_room_id"`
 	InviteeId      string    `json:"invitee_id"`
 	RequesterId    string    `json:"requester_id"`
+	Invitee        User      `gorm:"foreignKey:InviteeId;references:ID"`
+	Requester      User      `gorm:"foreignKey:RequesterId;references:ID"`
 }
 
 func (r *ReviewRequest) BeforeCreate(tx *gorm.DB) error {

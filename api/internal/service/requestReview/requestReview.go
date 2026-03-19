@@ -6,6 +6,7 @@ import (
 	approvalroomapprover "github.com/faissalmaulana/go-approve/internal/repository/approvalRoomApprover"
 	requestreview "github.com/faissalmaulana/go-approve/internal/repository/requestReview"
 	"github.com/faissalmaulana/go-approve/internal/repository/transactions"
+	"github.com/faissalmaulana/go-approve/internal/model"
 	"github.com/faissalmaulana/go-approve/internal/utils"
 )
 
@@ -40,4 +41,14 @@ func (r *RequestReviewService) ConfirmRequestRevieWithInsertApprover(
 	createApprovalApproverTx := r.ApprovalApproverStorage.CreateWithTx(approvalId, requestReview.ApprovalRoomId)
 
 	return r.dbTransaction.RunTransactions(ctx, requestReviewUpdateStatusTx, createApprovalApproverTx)
+}
+
+func (r *RequestReviewService) GetReceivedInvitations(
+	ctx context.Context,
+	inviteeId string,
+	status *utils.Status,
+	limit int,
+	offset int,
+) ([]model.ReviewRequest, error) {
+	return r.RequestReviewStorage.GetReceivedInvitations(ctx, inviteeId, status, limit, offset)
 }

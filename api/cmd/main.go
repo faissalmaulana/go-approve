@@ -53,6 +53,7 @@ func main() {
 			handlers.NewGetApprovalRoomByIdHandler,
 			handlers.NewUpdateApprovalStatusHandler,
 			handlers.NewConfirmRequestReviewHandler,
+			handlers.NewGetRequestReviewHandler,
 			middleware.NewAuthMiddleware,
 			zap.NewProduction,
 			validator.New,

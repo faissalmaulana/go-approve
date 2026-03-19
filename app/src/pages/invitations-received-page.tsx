@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { api, ApiError } from "@/lib/api"
+import { getAuthHeaders } from "@/lib/auth"
 
 type InvitationStatus = "pending" | "accepted" | "rejected"
 
@@ -58,11 +60,6 @@ function statusLabel(status: InvitationStatus) {
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
-function initials(nameOrHandle: string) {
-  const raw = nameOrHandle.trim()
-  if (!raw) return "?"
-  return raw.charAt(0).toUpperCase()
-}
 
 function FilterButton({
   active,
@@ -81,7 +78,7 @@ function FilterButton({
         "px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors",
         "hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         active &&
-          "rounded-md bg-background text-foreground shadow-sm ring-1 ring-foreground/10"
+        "rounded-md bg-background text-foreground shadow-sm ring-1 ring-foreground/10"
       )}
     >
       {children}
@@ -91,55 +88,81 @@ function FilterButton({
 
 export function InvitationsReceivedPage() {
   const [filter, setFilter] = useState<Filter>("all")
-  const [items, setItems] = useState<Invitation[]>([
-    {
-      id: "inv_1",
-      roomId: "room_9921_alpha",
-      requestedBy: { name: "JD", handle: "requester_id: 1042" },
-      createdAt: "2023-10-24T14:20:00.000Z",
-      status: "pending",
+  const queryClient = useQueryClient()
+
+  const limit = 10
+  const [offset, setOffset] = useState(0)
+
+  type ApiInvitation = {
+    id: string
+    room_id: string
+    status: InvitationStatus
+    created_at: string
+    requested_by: {
+      id: string
+      name: string
+      handler: string
+    }
+  }
+
+  useEffect(() => {
+    setOffset(0)
+  }, [filter])
+
+  const { data: items = [], isLoading, error } = useQuery({
+    queryKey: ["request-review", "received", filter, limit, offset],
+    queryFn: async () => {
+      const params = new URLSearchParams({ as: "received" })
+      if (filter !== "all") params.set("status", filter)
+      params.set("limit", String(limit))
+      params.set("offset", String(offset))
+
+      const res = await api.get<ApiInvitation[]>(`/request-review?${params.toString()}`, {
+        headers: getAuthHeaders(),
+      })
+
+      return res.map<Invitation>((r) => ({
+        id: r.id,
+        roomId: r.room_id,
+        createdAt: r.created_at,
+        status: r.status,
+        requestedBy: {
+          name: r.requested_by.name,
+          handle: r.requested_by.handler,
+        },
+      }))
     },
-    {
-      id: "inv_2",
-      roomId: "room_8842_beta",
-      requestedBy: { handle: "requester_id: 2190" },
-      createdAt: "2023-10-22T09:15:00.000Z",
-      status: "accepted",
-    },
-    {
-      id: "inv_3",
-      roomId: "room_7710_gamma",
-      requestedBy: { handle: "requester_id: 1105" },
-      createdAt: "2023-10-20T18:45:00.000Z",
-      status: "rejected",
-    },
-    {
-      id: "inv_4",
-      roomId: "room_2201_zeta",
-      requestedBy: { handle: "requester_id: 5542" },
-      createdAt: "2023-10-25T10:00:00.000Z",
-      status: "pending",
-    },
-  ])
+  })
 
   const filtered = useMemo(() => {
     if (filter === "all") return items
     return items.filter((i) => i.status === filter)
   }, [filter, items])
 
-  const showingStart = filtered.length === 0 ? 0 : 1
-  const showingEnd = filtered.length
-  const total = items.length
+  const showingStart = filtered.length === 0 ? 0 : offset + 1
+  const showingEnd = offset + filtered.length
+  const canPrevious = offset > 0
+  const canNext = filtered.length === limit
 
   const [loadingId, setLoadingId] = useState<string | null>(null)
+
+  const confirmMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: InvitationStatus }) => {
+      await api.put(
+        `/request-review/${id}/confirm`,
+        { status },
+        { headers: getAuthHeaders() }
+      )
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request-review", "received"] })
+    },
+  })
 
   const handleAccept = async (id: string) => {
     setLoadingId(id)
     try {
-      await api.patch(`/request-review/${id}/confirm`, { status: "accepted" })
-      setItems((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, status: "accepted" } : i))
-      )
+      await confirmMutation.mutateAsync({ id, status: "accepted" })
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Failed to accept request"
       console.error(message)
@@ -151,10 +174,7 @@ export function InvitationsReceivedPage() {
   const handleReject = async (id: string) => {
     setLoadingId(id)
     try {
-      await api.patch(`/request-review/${id}/confirm`, { status: "rejected" })
-      setItems((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, status: "rejected" } : i))
-      )
+      await confirmMutation.mutateAsync({ id, status: "rejected" })
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Failed to reject request"
       console.error(message)
@@ -206,6 +226,14 @@ export function InvitationsReceivedPage() {
           <CardDescription>Incoming invitations awaiting your action.</CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
+          {isLoading && (
+            <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
+          )}
+          {error && (
+            <div className="pb-4 text-sm text-red-600">
+              Failed to load invitations
+            </div>
+          )}
           <div className="rounded-lg border">
             <Table>
               <TableHeader>
@@ -220,7 +248,6 @@ export function InvitationsReceivedPage() {
 
               <TableBody>
                 {filtered.map((inv) => {
-                  const displayName = inv.requestedBy.name ?? inv.requestedBy.handle
                   const isDone = inv.status !== "pending"
 
                   return (
@@ -250,14 +277,9 @@ export function InvitationsReceivedPage() {
                       </TableCell>
 
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                            {initials(displayName)}
-                          </div>
-                          <span className="text-sm text-foreground">
-                            {inv.requestedBy.handle}
-                          </span>
-                        </div>
+                        <span className="text-sm text-foreground">
+                          {['@', inv.requestedBy.handle].join("")}
+                        </span>
                       </TableCell>
 
                       <TableCell className="text-muted-foreground">
@@ -308,13 +330,23 @@ export function InvitationsReceivedPage() {
 
           <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
             <div>
-              Showing {showingStart}-{showingEnd} of {total} requests
+              Showing {showingStart}-{showingEnd} requests
             </div>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" disabled>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!canPrevious || isLoading}
+                onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
+              >
                 Previous
               </Button>
-              <Button size="sm" variant="outline" disabled>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!canNext || isLoading}
+                onClick={() => setOffset((prev) => prev + limit)}
+              >
                 Next
               </Button>
             </div>
@@ -324,4 +356,3 @@ export function InvitationsReceivedPage() {
     </div>
   )
 }
-
