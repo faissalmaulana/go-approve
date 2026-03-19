@@ -112,9 +112,31 @@ export function HomePage() {
   return (
     <main className="min-h-dvh px-4 py-10">
       <div className="mx-auto w-full max-w-4xl space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
-          <p className="text-sm text-muted-foreground">Review approval rooms you created.</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
+            <p className="text-sm text-muted-foreground">Review approval rooms you created.</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
+              <FilterButton active={sort === "due_at"} onClick={() => setSortInUrl("due_at")}>
+                Due At
+              </FilterButton>
+              <FilterButton active={sort === "created_at"} onClick={() => setSortInUrl("created_at")}>
+                Created At
+              </FilterButton>
+            </div>
+
+            <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
+              <FilterButton active={order === "desc"} onClick={() => setOrderInUrl("desc")}>
+                Latest
+              </FilterButton>
+              <FilterButton active={order === "asc"} onClick={() => setOrderInUrl("asc")}>
+                Oldest
+              </FilterButton>
+            </div>
+          </div>
         </div>
 
         <Card className="shadow-sm">
@@ -122,25 +144,6 @@ export function HomePage() {
             <CardTitle className="text-base">Requests</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="flex items-start justify-between gap-4 pb-4">
-              <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
-                <FilterButton active={sort === "due_at"} onClick={() => setSortInUrl("due_at")}>
-                  Due At
-                </FilterButton>
-                <FilterButton active={sort === "created_at"} onClick={() => setSortInUrl("created_at")}>
-                  Created At
-                </FilterButton>
-              </div>
-
-              <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
-                <FilterButton active={order === "desc"} onClick={() => setOrderInUrl("desc")}>
-                  Latest
-                </FilterButton>
-                <FilterButton active={order === "asc"} onClick={() => setOrderInUrl("asc")}>
-                  Oldest
-                </FilterButton>
-              </div>
-            </div>
 
             {isLoading && (
               <div className="pb-4 text-sm text-muted-foreground">Loading...</div>
