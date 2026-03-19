@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useSearchParams } from "react-router"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -87,11 +88,15 @@ function FilterButton({
 }
 
 export function InvitationsReceivedPage() {
-  const [filter, setFilter] = useState<Filter>("all")
   const queryClient = useQueryClient()
 
-  const limit = 10
-  const [offset, setOffset] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const filter = (searchParams.get("status") as Filter | null) ?? "all"
+  const limit = Math.max(1, Number(searchParams.get("limit") ?? "10") || 10)
+  const offset = Math.max(0, Number(searchParams.get("offset") ?? "0") || 0)
+
+  const [filterDraft, setFilterDraft] = useState<Filter>(filter)
 
   type ApiInvitation = {
     id: string
@@ -105,9 +110,22 @@ export function InvitationsReceivedPage() {
     }
   }
 
-  useEffect(() => {
-    setOffset(0)
-  }, [filter])
+  const setStatusInUrl = (next: Filter) => {
+    setFilterDraft(next)
+    const nextParams = new URLSearchParams(searchParams)
+    if (next === "all") nextParams.delete("status")
+    else nextParams.set("status", next)
+    nextParams.set("offset", "0")
+    if (!nextParams.get("limit")) nextParams.set("limit", String(limit))
+    setSearchParams(nextParams)
+  }
+
+  const setOffsetInUrl = (nextOffset: number) => {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("offset", String(Math.max(0, nextOffset)))
+    if (!nextParams.get("limit")) nextParams.set("limit", String(limit))
+    setSearchParams(nextParams)
+  }
 
   const { data: items = [], isLoading, error } = useQuery({
     queryKey: ["request-review", "received", filter, limit, offset],
@@ -196,24 +214,24 @@ export function InvitationsReceivedPage() {
         </div>
 
         <div className="inline-flex items-center rounded-lg border bg-muted/30 p-1">
-          <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
+          <FilterButton active={filterDraft === "all"} onClick={() => setStatusInUrl("all")}>
             All
           </FilterButton>
           <FilterButton
-            active={filter === "pending"}
-            onClick={() => setFilter("pending")}
+            active={filterDraft === "pending"}
+            onClick={() => setStatusInUrl("pending")}
           >
             Pending
           </FilterButton>
           <FilterButton
-            active={filter === "accepted"}
-            onClick={() => setFilter("accepted")}
+            active={filterDraft === "accepted"}
+            onClick={() => setStatusInUrl("accepted")}
           >
             Accepted
           </FilterButton>
           <FilterButton
-            active={filter === "rejected"}
-            onClick={() => setFilter("rejected")}
+            active={filterDraft === "rejected"}
+            onClick={() => setStatusInUrl("rejected")}
           >
             Rejected
           </FilterButton>
@@ -337,7 +355,7 @@ export function InvitationsReceivedPage() {
                 size="sm"
                 variant="outline"
                 disabled={!canPrevious || isLoading}
-                onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
+                onClick={() => setOffsetInUrl(offset - limit)}
               >
                 Previous
               </Button>
@@ -345,7 +363,7 @@ export function InvitationsReceivedPage() {
                 size="sm"
                 variant="outline"
                 disabled={!canNext || isLoading}
-                onClick={() => setOffset((prev) => prev + limit)}
+                onClick={() => setOffsetInUrl(offset + limit)}
               >
                 Next
               </Button>
