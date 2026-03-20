@@ -104,6 +104,7 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 	type responseRow struct {
 		ID        string      `json:"id"`
 		RoomID    string      `json:"room_id"`
+		RoomTitle string      `json:"room_title"`
 		Status    string      `json:"status"`
 		CreatedAt string      `json:"created_at"`
 		User      invitedUser `json:"user"`
@@ -126,6 +127,7 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 			resp = append(resp, responseRow{
 				ID:        it.ID,
 				RoomID:    it.ApprovalRoomId,
+				RoomTitle: it.ApprovalRoom.Title,
 				Status:    it.Status,
 				CreatedAt: it.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 				User: invitedUser{
@@ -155,6 +157,7 @@ func (g *GetRequestReviewHandler) HandleFunc(c *echo.Context) error {
 		resp = append(resp, responseRow{
 			ID:        it.ID,
 			RoomID:    it.ApprovalRoomId,
+			RoomTitle: it.ApprovalRoom.Title,
 			Status:    it.Status,
 			CreatedAt: it.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 			User: invitedUser{

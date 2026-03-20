@@ -103,7 +103,8 @@ func (r *RequestReviewRepository) GetReceivedInvitations(
 
 	q := gorm.G[model.ReviewRequest](r.db).
 		Where("invitee_id = ?", inviteeId).
-		Preload("Requester", nil)
+		Preload("Requester", nil).
+		Preload("ApprovalRoom", nil)
 
 	if status != nil {
 		q = q.Where("status = ?", status.String())
@@ -131,7 +132,8 @@ func (r *RequestReviewRepository) GetSentInvitations(
 
 	q := gorm.G[model.ReviewRequest](r.db).
 		Where("requester_id = ?", requesterId).
-		Preload("Invitee", nil)
+		Preload("Invitee", nil).
+		Preload("ApprovalRoom", nil)
 
 	if status != nil {
 		q = q.Where("status = ?", status.String())

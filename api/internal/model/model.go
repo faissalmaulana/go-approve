@@ -52,15 +52,16 @@ type ApprovalRoomApprover struct {
 }
 
 type ReviewRequest struct {
-	ID             string    `json:"id"`
-	IsRead         bool      `json:"is_read"`
-	Status         string    `json:"status"`
-	CreatedAt      time.Time `json:"created_at"`
-	ApprovalRoomId string    `json:"approval_room_id"`
-	InviteeId      string    `json:"invitee_id"`
-	RequesterId    string    `json:"requester_id"`
-	Invitee        User      `gorm:"foreignKey:InviteeId;references:ID"`
-	Requester      User      `gorm:"foreignKey:RequesterId;references:ID"`
+	ID             string       `json:"id"`
+	IsRead         bool         `json:"is_read"`
+	Status         string       `json:"status"`
+	CreatedAt      time.Time    `json:"created_at"`
+	ApprovalRoomId string       `json:"approval_room_id"`
+	InviteeId      string       `json:"invitee_id"`
+	RequesterId    string       `json:"requester_id"`
+	Invitee        User         `gorm:"foreignKey:InviteeId;references:ID"`
+	Requester      User         `gorm:"foreignKey:RequesterId;references:ID"`
+	ApprovalRoom   ApprovalRoom `gorm:"foreignKey:ApprovalRoomId;references:ID"`
 }
 
 func (r *ReviewRequest) BeforeCreate(tx *gorm.DB) error {

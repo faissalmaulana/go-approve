@@ -21,7 +21,7 @@ type InvitationStatus = "pending" | "accepted" | "rejected"
 
 type Invitation = {
   id: string
-  roomId: string
+  roomTitle: string
   requestedBy: {
     name?: string
     handle: string
@@ -94,6 +94,7 @@ export function InvitationsReceivedPage() {
   type ApiInvitation = {
     id: string
     room_id: string
+    room_title: string
     status: InvitationStatus
     created_at: string
     user: {
@@ -134,7 +135,7 @@ export function InvitationsReceivedPage() {
 
       return res.map<Invitation>((r) => ({
         id: r.id,
-        roomId: r.room_id,
+        roomTitle: r.room_title,
         createdAt: r.created_at,
         status: r.status,
         requestedBy: {
@@ -245,7 +246,7 @@ export function InvitationsReceivedPage() {
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
               <TableHead className="px-4">STATUS</TableHead>
-              <TableHead>ROOM ID</TableHead>
+              <TableHead>ROOM TITLE</TableHead>
               <TableHead>REQUESTED BY</TableHead>
               <TableHead>DATE CREATED</TableHead>
               <TableHead className="text-right pr-4">ACTIONS</TableHead>
@@ -279,7 +280,7 @@ export function InvitationsReceivedPage() {
                   </TableCell>
 
                   <TableCell className="font-medium text-muted-foreground">
-                    {inv.roomId}
+                    {inv.roomTitle}
                   </TableCell>
 
                   <TableCell>
