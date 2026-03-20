@@ -296,7 +296,7 @@ export function InvitationsReceivedPage() {
                   <TableCell className="text-right pr-4">
                     {isDone ? (
                       <span className="text-sm italic text-muted-foreground">
-                        Action completed
+                        Completed
                       </span>
                     ) : (
                       <div className="inline-flex items-center gap-2">
